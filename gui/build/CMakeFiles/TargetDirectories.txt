@@ -1,0 +1,9 @@
+/home/wozt/GoofyDeck/gui/build/CMakeFiles/goofydeck-gui.dir
+/home/wozt/GoofyDeck/gui/build/CMakeFiles/edit_cache.dir
+/home/wozt/GoofyDeck/gui/build/CMakeFiles/rebuild_cache.dir
+/home/wozt/GoofyDeck/gui/build/CMakeFiles/list_install_components.dir
+/home/wozt/GoofyDeck/gui/build/CMakeFiles/install.dir
+/home/wozt/GoofyDeck/gui/build/CMakeFiles/install/local.dir
+/home/wozt/GoofyDeck/gui/build/CMakeFiles/install/strip.dir
+/home/wozt/GoofyDeck/gui/build/CMakeFiles/goofydeck-gui_autogen_timestamp_deps.dir
+/home/wozt/GoofyDeck/gui/build/CMakeFiles/goofydeck-gui_autogen.dir

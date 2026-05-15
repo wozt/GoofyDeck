@@ -32,11 +32,17 @@ ifneq ($(strip $(MDI_LIBS)),)
 HAVE_MDI := 1
 endif
 
-.PHONY: all daemon tools icons clean dir_bin dir_icons
+.PHONY: all daemon tools icons clean dir_bin dir_icons gui gui-clean
 
-all: daemon tools icons
+all: daemon tools icons gui
 
 daemon: ulanzi_d200_daemon
+
+gui:
+	@mkdir -p gui/build && cd gui/build && cmake .. && $(MAKE) -j$$(nproc)
+
+gui-clean:
+	cd gui && rm -rf build
 
 ulanzi_d200_daemon: ulanzi_d200_daemon.c
 	$(CC) $(CFLAGS) -o $@ $< $(HID_LIBS) $(ZLIB_LIBS) $(PNG_LIBS)
@@ -117,3 +123,4 @@ clean:
 	rm -f icons/draw_text_rectangle icons/draw_optimize_rectangle icons/draw_over_rectangle
 	rm -f icons/draw_normalize_rectangle
 	rm -f icons/draw_mdi_rectangle icons/draw_svg_rectangle
+	$(MAKE) -C gui clean

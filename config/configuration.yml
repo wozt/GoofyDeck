@@ -21,73 +21,71 @@ system_buttons:
     position: 12
   $page.next:
     position: 13
-
 presets:
   $nav:
-    icon_background_color: "transparent"
+    icon_background_color: transparent
+    icon_border_color: FFFFFF
     icon_border_radius: 12
-    icon_border_width: 4
     icon_border_size: 128
-    icon_border_color: "FFFFFF"
-    icon_size: 120
-    icon_padding: 0
-    icon_offset: 0,0
+    icon_border_width: 4
     icon_brightness: 99
-    icon_color: "FFFFFF"
-  room_folder:
-    icon_border_width: 4
-    icon_border_color: "FFFFFF"
-    icon_border_size: 128
-    icon_color: "FFFFFF"
-    icon_background_color: "transparent"
-    icon_size: 126
-    icon_border_radius: 12
-    icon_offset: 0,0  
+    icon_color: FFFFFF
+    icon_offset: 0,0
     icon_padding: 0
-  host_folder:
-    icon_border_width: 4
-    icon_border_color: "EEA0A9"
-    icon_border_size: 128
-    icon_color: "FFFFFF"
-    icon_background_color: "transparent"
-    icon_size: 126
-    icon_border_radius: 12
-    icon_offset: 0,0  
-    icon_padding: 0
+    icon_size: 120
   base_button:
-    icon_background_color: "transparent"
-    icon_size: 128
+    icon_background_color: transparent
     icon_border_radius: 12
-    icon_color: "FFFFFF"
+    icon_color: FFFFFF
+    icon_size: 128
   cmd_button:
-    icon_background_color: "transparent"
+    icon_background_color: transparent
+    icon_border_radius: 12
+    icon_color: FFFFFF
     icon_size: 128
-    icon_border_radius: 12
-    icon_color: "FFFFFF"
-    text_color: "00FF00"
-    text_align: "center"
-    text_font: "dustismo_bold.ttf"
+    text_align: center
+    text_color: 00FF00
+    text_font: dustismo_bold.ttf
+    text_offset: 0,0
     text_size: 50
-    text_offset: 0,0 
-  settings_folder:
-    icon_border_width: 4
-    icon_border_color: "44EB22"
-    icon_border_size: 128
-    icon_color: "FFFFFF"
-    icon_background_color: "transparent"
-    icon_size: 126
+  host_folder:
+    icon_background_color: transparent
+    icon_border_color: EEA0A9
     icon_border_radius: 12
-    icon_offset: 0,0  
+    icon_border_size: 128
+    icon_border_width: 4
+    icon_color: FFFFFF
+    icon_offset: 0,0
     icon_padding: 0
+    icon_size: 126
   light_off:
-    icon: mdi:lightbulb-outline
-    icon_background_color: "transparent"
-    icon_color: "333333"
+    icon: "mdi:lightbulb-outline"
+    icon_background_color: transparent
+    icon_color: 333333
   light_on:
-    icon: mdi:lightbulb
-    icon_background_color: "transparent"
-    icon_color: "FFD700"
-
+    icon: "mdi:lightbulb"
+    icon_background_color: transparent
+    icon_color: FFD700
+  room_folder:
+    icon_background_color: transparent
+    icon_border_color: FFFFFF
+    icon_border_radius: 12
+    icon_border_size: 128
+    icon_border_width: 4
+    icon_color: FFFFFF
+    icon_offset: 0,0
+    icon_padding: 0
+    icon_size: 126
+  settings_folder:
+    icon_background_color: transparent
+    icon_border_color: 44EB22
+    icon_border_radius: 12
+    icon_border_size: 128
+    icon_border_width: 4
+    icon_color: FFFFFF
+    icon_offset: 0,0
+    icon_padding: 0
+    icon_size: 126
 pages:
   $root:
     wallpaper:
@@ -114,8 +112,7 @@ pages:
         tap_action:
           action: $page.go_to
           data: "chambre"
-      - name: ""
-      - name: ""     
+
       - name: "Debian PC"
         presets:
           - host_folder
@@ -144,13 +141,21 @@ pages:
         tap_action:
           action: $page.go_to
           data: pi4
+      - name: "pi5"
+        presets:
+          - host_folder
+        icon: mdi:raspberry-pi
+        tap_action:
+          action: $page.go_to
+          data: pi5
+      - name: ""
+      - name: ""
       - name: "Apps"
         presets: [room_folder]
         icon: mdi:apps
         tap_action:
           action: $page.go_to
           data: apps
-      - name: ""
       - name: "settings"
         presets:
           - settings_folder
@@ -299,7 +304,46 @@ pages:
         icon: mdi:power
         tap_action:
           action: script.power_off_debian_pc 
-                       
+      - name: "Firefox"
+        presets:
+          - base_button
+        icon: url:https://upload.wikimedia.org/wikipedia/commons/e/e7/Firefox_logo%2C_2019.png
+        tap_action:
+          action: $cmd.exec
+          data:
+            cmd: "mymedia/scripts/display0_launcher.sh firefox"
+      - name: "Steam"
+        presets:
+          - base_button
+        icon: url:https://upload.wikimedia.org/wikipedia/commons/c/c1/Steam_Logo.png
+        tap_action:
+          action: $cmd.exec
+          data:
+            cmd: "mymedia/scripts/display0_launcher.sh steam"
+      - name: "Discord"
+        presets:
+          - base_button
+        icon: url:https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg
+        tap_action:
+          action: $cmd.exec
+          data:
+            cmd: "mymedia/scripts/display0_launcher.sh discord"
+      - name: "OBS"
+        presets:
+          - base_button
+        icon: url:https://upload.wikimedia.org/wikipedia/commons/archive/1/13/20180807124923%21OBS_Studio_logo.png
+        tap_action:
+          action: $cmd.exec
+          data:
+            cmd: "mymedia/scripts/display0_launcher.sh '/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=obs com.obsproject.Studio'"
+      - name: "QpwGraph"
+        presets:
+          - base_button
+        icon: url:https://dl.flathub.org/media/org/rncbc/qpwgraph/428d4c49aeea9e6fdbfd0d3e7e380970/icons/128x128@2/org.rncbc.qpwgraph.png
+        tap_action:
+          action: $cmd.exec
+          data:
+            cmd: "mymedia/scripts/display0_launcher.sh qpwgraph"                 
   debian_minipc:
     buttons:
       - name: "reboot"
@@ -348,6 +392,22 @@ pages:
         icon: mdi:power
         tap_action:
           action: script.power_off_rpi4
+  pi5:
+    buttons:
+      - name: "reboot"
+        entity_id: script.reboot_rpi5
+        presets:
+          - base_button
+        icon: mdi:restart
+        tap_action:
+          action: script.reboot_rpi5
+      - name: "poweroff"
+        entity_id: script.power_off_rpi5
+        presets:
+          - base_button
+        icon: mdi:power
+        tap_action:
+          action: script.power_off_rpi5
   settings:
     wallpaper:
       path: "mymedia/wallpapers/settings16bits.png"

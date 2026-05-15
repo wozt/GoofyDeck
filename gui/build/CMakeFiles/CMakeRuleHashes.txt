@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+b5f7f1a9ee8a962877ec16a026020739 CMakeFiles/goofydeck-gui_autogen
+17fb9bf880f049f0e6c67e68b278963e goofydeck-gui_autogen/timestamp

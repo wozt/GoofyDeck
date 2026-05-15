@@ -406,6 +406,30 @@ compile_binaries() {
   log_success "Compilation completed"
 }
 
+# Step 6b: GUI Compilation
+compile_gui() {
+  log "Step 6b: Compile GUI"
+  echo "==================="
+  
+  # Check if GUI already built
+  if [ -f "${ROOT}/gui/build/goofydeck-gui" ]; then
+    log "GUI already built, skipping"
+    return 0
+  fi
+  
+  read -p "Compile GoofyDeck GUI (requires Qt6)? [y/N]: " compile_gui
+  if [[ "${compile_gui}" =~ ^[Yy]*$ ]]; then
+    log "Building GUI..."
+    if make -C "${ROOT}" gui; then
+      log_success "GUI compilation completed"
+    else
+      log_warning "GUI compilation failed (optional)"
+    fi
+  else
+    log "Skipping GUI compilation"
+  fi
+}
+
 # Step 7: Systemd Service
 setup_systemd_service() {
   log "Step 7: Systemd Service"
@@ -624,6 +648,8 @@ main() {
   install_dependencies
   echo
   compile_binaries
+  echo
+  compile_gui
   echo
   setup_systemd_service
   echo

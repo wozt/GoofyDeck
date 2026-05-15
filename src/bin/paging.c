@@ -1941,6 +1941,36 @@ static int copy_file(const char *src, const char *dst) {
 static void state_dir(const Options *opt, char *out, size_t cap);
 static void sanitize_suffix(const char *in, char *out, size_t cap);
 
+// Save current icon with text overlay to current/ directory for GUI to read
+static void save_current_icon(const Options *opt, const char *src_png, const char *page_name, int pos) {
+    if (!opt || !src_png || !page_name) return;
+    char dir[PATH_MAX];
+    state_dir(opt, dir, sizeof(dir));
+    char current_dir[PATH_MAX];
+    if (path_snprintf(current_dir, sizeof(current_dir), "%s/current", dir) != 0) return;
+    ensure_dir(current_dir);
+    
+    char page_tag[96];
+    sanitize_suffix(page_name, page_tag, sizeof(page_tag));
+    if (page_tag[0] == 0) snprintf(page_tag, sizeof(page_tag), "page");
+    
+    char dst[PATH_MAX];
+    if (path_snprintf(dst, sizeof(dst), "%s/%s_%02d.png", current_dir, page_tag, pos) != 0) return;
+    
+    // Copy to current/ (overwrites previous)
+    if (copy_file(src_png, dst) == 0) {
+        // Write notification file for GUI to detect updates
+        char notify_path[PATH_MAX];
+        if (path_snprintf(notify_path, sizeof(notify_path), "%s/.last_update", current_dir) == 0) {
+            FILE *f = fopen(notify_path, "w");
+            if (f) {
+                fprintf(f, "%s_%02d.png\n", page_tag, pos);
+                fclose(f);
+            }
+        }
+    }
+}
+
 typedef struct {
     const char *path;
     int quality;
@@ -5104,6 +5134,7 @@ static void ha_partial_update_visible(const Options *opt, const Config *cfg, con
                                     char tmp_out[PATH_MAX];
                                     if (render_value_text_on_base_tmp(opt, pr, page_name, pos, composed_base, eff_text, tmp_out, sizeof(tmp_out)) == 0) {
                                         ulanzi_send_partial(opt, pos, tmp_out, label_src);
+                                        save_current_icon(opt, tmp_out, page_name, pos);
                                         unlink(tmp_out);
                                         sent = true;
                                     }
@@ -5115,8 +5146,9 @@ static void ha_partial_update_visible(const Options *opt, const Config *cfg, con
                             char tmp_out[PATH_MAX];
                             if (render_value_text_on_base_tmp(opt, pr, page_name, pos, base_png, eff_text, tmp_out, sizeof(tmp_out)) == 0) {
                                 snprintf(icon_path, sizeof(icon_path), "%s", tmp_out);
+                                save_current_icon(opt, icon_path, page_name, pos);
                                 ulanzi_send_partial_wallpaper(opt, cfg, page_name, pos, icon_path, label_src, blank_png);
-                                unlink(icon_path);
+                                unlink(tmp_out);
                                 sent = true;
                             }
                         }
@@ -5235,6 +5267,7 @@ static void cmd_apply_updates_current_page(const Options *opt, const Config *cfg
             }
             if (!have_icon) snprintf(icon_path, sizeof(icon_path), "%s", blank_png);
 
+            save_current_icon(opt, icon_path, page_name, pos);
             ulanzi_send_partial_wallpaper(opt, cfg, page_name, pos, icon_path, label_src, blank_png);
             pthread_mutex_lock(&ce->mu);
             snprintf(ce->last_sent_state, sizeof(ce->last_sent_state), "%s", cur_state);
@@ -5296,6 +5329,7 @@ static void cmd_apply_updates_current_page(const Options *opt, const Config *cfg
                         if (render_value_text_on_base_tmp(opt, pr, page_name, pos, composed_base, eff_text, tmp_out,
                                                           sizeof(tmp_out)) == 0) {
                             ulanzi_send_partial(opt, pos, tmp_out, label_src);
+                            save_current_icon(opt, tmp_out, page_name, pos);
                             unlink(tmp_out);
                             pthread_mutex_lock(&ce->mu);
                             snprintf(ce->last_sent_text, sizeof(ce->last_sent_text), "%s", cur_text);
@@ -5307,6 +5341,7 @@ static void cmd_apply_updates_current_page(const Options *opt, const Config *cfg
                     char tmp_out[PATH_MAX];
                     if (render_value_text_on_base_tmp(opt, pr, page_name, pos, base_png, eff_text, tmp_out, sizeof(tmp_out)) == 0) {
                         ulanzi_send_partial_wallpaper(opt, cfg, page_name, pos, tmp_out, label_src, blank_png);
+                        save_current_icon(opt, tmp_out, page_name, pos);
                         unlink(tmp_out);
                         pthread_mutex_lock(&ce->mu);
                         snprintf(ce->last_sent_text, sizeof(ce->last_sent_text), "%s", cur_text);
@@ -6203,6 +6238,52 @@ int main(int argc, char **argv) {
                                                 &ha_fd, ha_buf, &ha_len, &ha_map, &ha_subs,
                                                 last_sig, sizeof(last_sig));
                             resp = "ok\n";
+                        }
+                    }
+                } else if (strcmp(cmdline, "reload-config") == 0) {
+                    log_msg("reload-config requested");
+                    // Save current page info
+                    char saved_page[256];
+                    snprintf(saved_page, sizeof(saved_page), "%s", cur_page);
+                    size_t saved_offset = offset;
+                    
+                    // Free and reload config
+                    config_free(&cfg);
+                    memset(&cfg, 0, sizeof(cfg));
+                    
+                    if (load_config(opt.config_path, &cfg) != 0) {
+                        log_msg("reload-config: failed to load config");
+                        resp = "err reload failed\n";
+                    } else {
+                        log_msg("reload-config: config reloaded successfully");
+                        // Verify current page still exists
+                        if (config_get_page(&cfg, saved_page)) {
+                            // Restore page state and force full re-render
+                            snprintf(cur_page, sizeof(cur_page), "%s", saved_page);
+                            offset = saved_offset;
+                            last_sig[0] = 0; // force full refresh
+                            render_and_send(&opt, &cfg, cur_page, offset, &ha_map, blank_png, last_sig, sizeof(last_sig));
+                            persist_last_page(&opt, cur_page, offset);
+                            resp = "ok\n";
+                        } else {
+                            // Current page no longer exists, go to first available page
+                            const char *first_page = NULL;
+                            for (size_t i = 0; i < cfg.page_count; i++) {
+                                if (cfg.pages[i].name) {
+                                    first_page = cfg.pages[i].name;
+                                    break;
+                                }
+                            }
+                            if (first_page) {
+                                snprintf(cur_page, sizeof(cur_page), "%s", first_page);
+                                offset = 0;
+                                last_sig[0] = 0;
+                                render_and_send(&opt, &cfg, cur_page, offset, &ha_map, blank_png, last_sig, sizeof(last_sig));
+                                persist_last_page(&opt, cur_page, offset);
+                                resp = "ok\n";
+                            } else {
+                                resp = "err no pages\n";
+                            }
                         }
                     }
                 } else if (strcmp(cmdline, "load-last-page") == 0) {
