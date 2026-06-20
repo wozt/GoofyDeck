@@ -252,6 +252,12 @@
 			null
 		],
 		[
+			"/home/wozt/GoofyDeck/gui/src/Config.h",
+			"MU",
+			"UVLADIE3JM/moc_Config.cpp",
+			null
+		],
+		[
 			"/home/wozt/GoofyDeck/gui/src/ConfigEditor.h",
 			"MU",
 			"UVLADIE3JM/moc_ConfigEditor.cpp",
@@ -399,6 +405,7 @@
 	[
 		[ "/home/wozt/GoofyDeck/gui/src/ButtonEditDialog.cpp", "MU", null ],
 		[ "/home/wozt/GoofyDeck/gui/src/ButtonWidget.cpp", "MU", null ],
+		[ "/home/wozt/GoofyDeck/gui/src/Config.cpp", "MU", null ],
 		[ "/home/wozt/GoofyDeck/gui/src/ConfigEditor.cpp", "MU", null ],
 		[ "/home/wozt/GoofyDeck/gui/src/ConfigEditorDialog.cpp", "MU", null ],
 		[ "/home/wozt/GoofyDeck/gui/src/DeckWidget.cpp", "MU", null ],

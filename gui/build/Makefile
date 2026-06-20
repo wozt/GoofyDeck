@@ -272,6 +272,30 @@ src/ButtonWidget.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/goofydeck-gui.dir/build.make CMakeFiles/goofydeck-gui.dir/src/ButtonWidget.cpp.s
 .PHONY : src/ButtonWidget.cpp.s
 
+src/Config.o: src/Config.cpp.o
+.PHONY : src/Config.o
+
+# target to build an object file
+src/Config.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/goofydeck-gui.dir/build.make CMakeFiles/goofydeck-gui.dir/src/Config.cpp.o
+.PHONY : src/Config.cpp.o
+
+src/Config.i: src/Config.cpp.i
+.PHONY : src/Config.i
+
+# target to preprocess a source file
+src/Config.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/goofydeck-gui.dir/build.make CMakeFiles/goofydeck-gui.dir/src/Config.cpp.i
+.PHONY : src/Config.cpp.i
+
+src/Config.s: src/Config.cpp.s
+.PHONY : src/Config.s
+
+# target to generate assembly for a file
+src/Config.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/goofydeck-gui.dir/build.make CMakeFiles/goofydeck-gui.dir/src/Config.cpp.s
+.PHONY : src/Config.cpp.s
+
 src/ConfigEditor.o: src/ConfigEditor.cpp.o
 .PHONY : src/ConfigEditor.o
 
@@ -632,6 +656,9 @@ help:
 	@echo "... src/ButtonWidget.o"
 	@echo "... src/ButtonWidget.i"
 	@echo "... src/ButtonWidget.s"
+	@echo "... src/Config.o"
+	@echo "... src/Config.i"
+	@echo "... src/Config.s"
 	@echo "... src/ConfigEditor.o"
 	@echo "... src/ConfigEditor.i"
 	@echo "... src/ConfigEditor.s"

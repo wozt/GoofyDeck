@@ -7,6 +7,8 @@ goofydeck-gui_autogen/timestamp: \
 	/home/wozt/GoofyDeck/gui/src/ButtonEditDialog.h \
 	/home/wozt/GoofyDeck/gui/src/ButtonWidget.cpp \
 	/home/wozt/GoofyDeck/gui/src/ButtonWidget.h \
+	/home/wozt/GoofyDeck/gui/src/Config.cpp \
+	/home/wozt/GoofyDeck/gui/src/Config.h \
 	/home/wozt/GoofyDeck/gui/src/ConfigEditor.cpp \
 	/home/wozt/GoofyDeck/gui/src/ConfigEditor.h \
 	/home/wozt/GoofyDeck/gui/src/ConfigEditorDialog.cpp \

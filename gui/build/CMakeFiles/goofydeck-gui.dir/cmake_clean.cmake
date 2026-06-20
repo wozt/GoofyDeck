@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/goofydeck-gui.dir/src/ButtonEditDialog.cpp.o.d"
   "CMakeFiles/goofydeck-gui.dir/src/ButtonWidget.cpp.o"
   "CMakeFiles/goofydeck-gui.dir/src/ButtonWidget.cpp.o.d"
+  "CMakeFiles/goofydeck-gui.dir/src/Config.cpp.o"
+  "CMakeFiles/goofydeck-gui.dir/src/Config.cpp.o.d"
   "CMakeFiles/goofydeck-gui.dir/src/ConfigEditor.cpp.o"
   "CMakeFiles/goofydeck-gui.dir/src/ConfigEditor.cpp.o.d"
   "CMakeFiles/goofydeck-gui.dir/src/ConfigEditorDialog.cpp.o"

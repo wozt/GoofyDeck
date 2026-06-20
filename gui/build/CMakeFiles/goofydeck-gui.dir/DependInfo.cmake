@@ -12,6 +12,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/wozt/GoofyDeck/gui/build/goofydeck-gui_autogen/mocs_compilation.cpp" "CMakeFiles/goofydeck-gui.dir/goofydeck-gui_autogen/mocs_compilation.cpp.o" "gcc" "CMakeFiles/goofydeck-gui.dir/goofydeck-gui_autogen/mocs_compilation.cpp.o.d"
   "/home/wozt/GoofyDeck/gui/src/ButtonEditDialog.cpp" "CMakeFiles/goofydeck-gui.dir/src/ButtonEditDialog.cpp.o" "gcc" "CMakeFiles/goofydeck-gui.dir/src/ButtonEditDialog.cpp.o.d"
   "/home/wozt/GoofyDeck/gui/src/ButtonWidget.cpp" "CMakeFiles/goofydeck-gui.dir/src/ButtonWidget.cpp.o" "gcc" "CMakeFiles/goofydeck-gui.dir/src/ButtonWidget.cpp.o.d"
+  "/home/wozt/GoofyDeck/gui/src/Config.cpp" "CMakeFiles/goofydeck-gui.dir/src/Config.cpp.o" "gcc" "CMakeFiles/goofydeck-gui.dir/src/Config.cpp.o.d"
   "/home/wozt/GoofyDeck/gui/src/ConfigEditor.cpp" "CMakeFiles/goofydeck-gui.dir/src/ConfigEditor.cpp.o" "gcc" "CMakeFiles/goofydeck-gui.dir/src/ConfigEditor.cpp.o.d"
   "/home/wozt/GoofyDeck/gui/src/ConfigEditorDialog.cpp" "CMakeFiles/goofydeck-gui.dir/src/ConfigEditorDialog.cpp.o" "gcc" "CMakeFiles/goofydeck-gui.dir/src/ConfigEditorDialog.cpp.o.d"
   "/home/wozt/GoofyDeck/gui/src/DeckWidget.cpp" "CMakeFiles/goofydeck-gui.dir/src/DeckWidget.cpp.o" "gcc" "CMakeFiles/goofydeck-gui.dir/src/DeckWidget.cpp.o.d"

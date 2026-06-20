@@ -334,14 +334,11 @@ CMakeFiles/goofydeck-gui.dir/src/HaClient.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qmap.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qshareddata.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qshareddata_impl.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/QLocalSocket \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qlocalsocket.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetworkglobal.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetwork-config.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetworkexports.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevice.h \
+ /home/wozt/GoofyDeck/gui/src/Config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QSettings \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qsettings.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qobject.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qabstractsocket.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qvariant.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qdebug.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qtextstream.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qcontiguouscache.h \
@@ -360,12 +357,16 @@ CMakeFiles/goofydeck-gui.dir/src/HaClient.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qset.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qhash.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qvarlengtharray.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/QTimer \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qtimer.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qbasictimer.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/QFile \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/q23utility.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QDir \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdir.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdirlisting.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qfiledevice.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevice.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdatetime.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qcalendar.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qlocale.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
  /usr/include/c++/14/filesystem /usr/include/c++/14/bits/fs_fwd.h \
  /usr/include/c++/14/bits/fs_path.h /usr/include/c++/14/locale \
  /usr/include/c++/14/bits/locale_facets.h /usr/include/c++/14/cwctype \
@@ -387,6 +388,19 @@ CMakeFiles/goofydeck-gui.dir/src/HaClient.cpp.o: \
  /usr/include/c++/14/bits/istream.tcc \
  /usr/include/c++/14/bits/sstream.tcc /usr/include/c++/14/codecvt \
  /usr/include/c++/14/bits/fs_dir.h /usr/include/c++/14/bits/fs_ops.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfileinfo.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qtimezone.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/QLocalSocket \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qlocalsocket.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetworkglobal.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetwork-config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetworkexports.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qabstractsocket.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QTimer \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qtimer.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qbasictimer.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QFile \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QTextStream \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qtextstream.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QDebug \
@@ -396,11 +410,6 @@ CMakeFiles/goofydeck-gui.dir/src/HaClient.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qjsonvalue.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qcborvalue.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qcborcommon.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qdatetime.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qcalendar.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qlocale.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qvariant.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/q23utility.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qregularexpression.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qurl.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/quuid.h \

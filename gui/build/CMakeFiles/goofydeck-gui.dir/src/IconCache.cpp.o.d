@@ -413,6 +413,9 @@ CMakeFiles/goofydeck-gui.dir/src/IconCache.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qbasictimer.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QMap \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qmap.h \
+ /home/wozt/GoofyDeck/gui/src/Config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QSettings \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qsettings.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QFile \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QFileInfo \

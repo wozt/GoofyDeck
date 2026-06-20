@@ -391,6 +391,41 @@ CMakeFiles/goofydeck-gui.dir/src/ButtonWidget.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qobject.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QString \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qstring.h \
+ /home/wozt/GoofyDeck/gui/src/Config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QSettings \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qsettings.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QDir \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdir.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdirlisting.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfiledevice.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevice.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdatetime.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qcalendar.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qlocale.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
+ /usr/include/c++/14/filesystem /usr/include/c++/14/bits/fs_fwd.h \
+ /usr/include/c++/14/bits/fs_path.h /usr/include/c++/14/locale \
+ /usr/include/c++/14/bits/locale_facets.h /usr/include/c++/14/cwctype \
+ /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h \
+ /usr/include/c++/14/bits/locale_facets.tcc \
+ /usr/include/c++/14/bits/locale_facets_nonio.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h \
+ /usr/include/libintl.h /usr/include/c++/14/bits/codecvt.h \
+ /usr/include/c++/14/bits/locale_facets_nonio.tcc \
+ /usr/include/c++/14/bits/locale_conv.h /usr/include/c++/14/iomanip \
+ /usr/include/c++/14/bits/quoted_string.h /usr/include/c++/14/sstream \
+ /usr/include/c++/14/istream /usr/include/c++/14/ios \
+ /usr/include/c++/14/bits/basic_ios.h \
+ /usr/include/c++/14/bits/basic_ios.tcc /usr/include/c++/14/ostream \
+ /usr/include/c++/14/bits/ostream.tcc \
+ /usr/include/c++/14/bits/istream.tcc \
+ /usr/include/c++/14/bits/sstream.tcc /usr/include/c++/14/codecvt \
+ /usr/include/c++/14/bits/fs_dir.h /usr/include/c++/14/bits/fs_ops.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfileinfo.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qtimezone.h \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QVBoxLayout \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qboxlayout.h \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qlayout.h \
@@ -402,7 +437,6 @@ CMakeFiles/goofydeck-gui.dir/src/ButtonWidget.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qframe.h \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qwidget.h \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qpicture.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevice.h \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qtextdocument.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qurl.h \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QPushButton \
@@ -436,7 +470,6 @@ CMakeFiles/goofydeck-gui.dir/src/ButtonWidget.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qeventloop.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qcoreapplication_platform.h \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qinputmethod.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qlocale.h \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qguiapplication_platform.h \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/QContextMenuEvent \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QMenu \
@@ -448,35 +481,11 @@ CMakeFiles/goofydeck-gui.dir/src/ButtonWidget.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qstyle.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QFile \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qfiledevice.h \
- /usr/include/c++/14/filesystem /usr/include/c++/14/bits/fs_fwd.h \
- /usr/include/c++/14/bits/fs_path.h /usr/include/c++/14/locale \
- /usr/include/c++/14/bits/locale_facets.h /usr/include/c++/14/cwctype \
- /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
- /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h \
- /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h \
- /usr/include/c++/14/bits/locale_facets.tcc \
- /usr/include/c++/14/bits/locale_facets_nonio.h \
- /usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h \
- /usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h \
- /usr/include/libintl.h /usr/include/c++/14/bits/codecvt.h \
- /usr/include/c++/14/bits/locale_facets_nonio.tcc \
- /usr/include/c++/14/bits/locale_conv.h /usr/include/c++/14/iomanip \
- /usr/include/c++/14/bits/quoted_string.h /usr/include/c++/14/sstream \
- /usr/include/c++/14/istream /usr/include/c++/14/ios \
- /usr/include/c++/14/bits/basic_ios.h \
- /usr/include/c++/14/bits/basic_ios.tcc /usr/include/c++/14/ostream \
- /usr/include/c++/14/bits/ostream.tcc \
- /usr/include/c++/14/bits/istream.tcc \
- /usr/include/c++/14/bits/sstream.tcc /usr/include/c++/14/codecvt \
- /usr/include/c++/14/bits/fs_dir.h /usr/include/c++/14/bits/fs_ops.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QJsonDocument \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qjsondocument.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qjsonvalue.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qcborvalue.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qcborcommon.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qdatetime.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qcalendar.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qregularexpression.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/quuid.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QJsonObject \

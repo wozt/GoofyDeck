@@ -329,14 +329,11 @@ CMakeFiles/goofydeck-gui.dir/src/GoofyDeckClient.cpp.o: \
  /usr/include/c++/14/ratio /usr/include/c++/14/ctime \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QString \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qstring.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/QLocalSocket \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qlocalsocket.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetworkglobal.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetwork-config.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetworkexports.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevice.h \
+ /home/wozt/GoofyDeck/gui/src/Config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QSettings \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qsettings.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qobject.h \
- /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qabstractsocket.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qvariant.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qdebug.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qtextstream.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qcontiguouscache.h \
@@ -357,5 +354,44 @@ CMakeFiles/goofydeck-gui.dir/src/GoofyDeckClient.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qset.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qhash.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qvarlengtharray.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/q23utility.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QDir \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdir.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdirlisting.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfiledevice.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevice.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdatetime.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qcalendar.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qlocale.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
+ /usr/include/c++/14/filesystem /usr/include/c++/14/bits/fs_fwd.h \
+ /usr/include/c++/14/bits/fs_path.h /usr/include/c++/14/locale \
+ /usr/include/c++/14/bits/locale_facets.h /usr/include/c++/14/cwctype \
+ /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h \
+ /usr/include/c++/14/bits/locale_facets.tcc \
+ /usr/include/c++/14/bits/locale_facets_nonio.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h \
+ /usr/include/libintl.h /usr/include/c++/14/bits/codecvt.h \
+ /usr/include/c++/14/bits/locale_facets_nonio.tcc \
+ /usr/include/c++/14/bits/locale_conv.h /usr/include/c++/14/iomanip \
+ /usr/include/c++/14/bits/quoted_string.h /usr/include/c++/14/sstream \
+ /usr/include/c++/14/istream /usr/include/c++/14/ios \
+ /usr/include/c++/14/bits/basic_ios.h \
+ /usr/include/c++/14/bits/basic_ios.tcc /usr/include/c++/14/ostream \
+ /usr/include/c++/14/bits/ostream.tcc \
+ /usr/include/c++/14/bits/istream.tcc \
+ /usr/include/c++/14/bits/sstream.tcc /usr/include/c++/14/codecvt \
+ /usr/include/c++/14/bits/fs_dir.h /usr/include/c++/14/bits/fs_ops.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfileinfo.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qtimezone.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/QLocalSocket \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qlocalsocket.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetworkglobal.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetwork-config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qtnetworkexports.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtNetwork/qabstractsocket.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QDebug \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qdebug.h

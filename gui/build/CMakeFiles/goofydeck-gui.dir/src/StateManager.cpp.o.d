@@ -368,12 +368,16 @@ CMakeFiles/goofydeck-gui.dir/src/StateManager.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QVector \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qvector.h \
  /home/wozt/GoofyDeck/gui/src/HaClient.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/QFileSystemWatcher \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qfilesystemwatcher.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/QFile \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
+ /home/wozt/GoofyDeck/gui/src/Config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QSettings \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qsettings.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QDir \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdir.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdirlisting.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qfiledevice.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevice.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdatetime.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
  /usr/include/c++/14/filesystem /usr/include/c++/14/bits/fs_fwd.h \
  /usr/include/c++/14/bits/fs_path.h /usr/include/c++/14/locale \
  /usr/include/c++/14/bits/locale_facets.h /usr/include/c++/14/cwctype \
@@ -395,13 +399,12 @@ CMakeFiles/goofydeck-gui.dir/src/StateManager.cpp.o: \
  /usr/include/c++/14/bits/istream.tcc \
  /usr/include/c++/14/bits/sstream.tcc /usr/include/c++/14/codecvt \
  /usr/include/c++/14/bits/fs_dir.h /usr/include/c++/14/bits/fs_ops.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/QDir \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qdir.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qdirlisting.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qdatetime.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qfileinfo.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qtimezone.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QFileSystemWatcher \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfilesystemwatcher.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QFile \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QDebug \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qdebug.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QRegularExpression \

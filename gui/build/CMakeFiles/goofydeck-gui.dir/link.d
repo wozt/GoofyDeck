@@ -19,6 +19,7 @@ goofydeck-gui: \
   CMakeFiles/goofydeck-gui.dir/src/PresetEditDialog.cpp.o \
   CMakeFiles/goofydeck-gui.dir/src/HaClient.cpp.o \
   CMakeFiles/goofydeck-gui.dir/src/StateManager.cpp.o \
+  CMakeFiles/goofydeck-gui.dir/src/Config.cpp.o \
   /usr/lib/x86_64-linux-gnu/libQt6Widgets.so.6.8.2 \
   /usr/lib/x86_64-linux-gnu/libQt6Network.so.6.8.2 \
   /usr/lib/x86_64-linux-gnu/libQt6Gui.so.6.8.2 \
@@ -296,6 +297,8 @@ CMakeFiles/goofydeck-gui.dir/src/PresetEditDialog.cpp.o:
 CMakeFiles/goofydeck-gui.dir/src/HaClient.cpp.o:
 
 CMakeFiles/goofydeck-gui.dir/src/StateManager.cpp.o:
+
+CMakeFiles/goofydeck-gui.dir/src/Config.cpp.o:
 
 /usr/lib/x86_64-linux-gnu/libQt6Widgets.so.6.8.2:
 
