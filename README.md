@@ -5,6 +5,12 @@ GoofyDeck controls an Ulanzi D200 with C daemons and config-driven paging, with 
 
 The previous (long) README has been archived to `legacy/README.md`.
 
+## Prerequisites
+
+- **Firmware update**: The Ulanzi D200 must have its firmware updated once using the official Windows software. Using a Windows VM works for this step. EDIT: its 06/2025 IDK what is status of the firmware, but it should work, maybe...
+- **System dependencies**: Automatically installed by `install.sh`
+- **sudo access**: Required for USB permissions and systemd service
+
 ## 🚀 Quick Start
 
 ```bash
@@ -98,11 +104,7 @@ cd /path/to/GoofyDeck
 ./launch_stack.sh --byobu
 ```
 
-## Prerequisites
 
-- **Firmware update**: The Ulanzi D200 must have its firmware updated once using the official Windows software. Using a Windows VM works for this step.
-- **System dependencies**: Automatically installed by `install.sh`
-- **sudo access**: Required for USB permissions and systemd service
 
 ## Build & Installation
 
