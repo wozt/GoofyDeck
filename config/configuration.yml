@@ -9,7 +9,7 @@ sleep:
   sleep_timeout: 86400
 
 wallpaper:
-  path: "mymedia/wallpapers/valley16bits.png"
+  path: "mymedia/wallpapers/stars.png"
   quality: 60
   magnify: 100
   dithering: yes
@@ -89,7 +89,7 @@ presets:
 pages:
   $root:
     wallpaper:
-      path: "mymedia/wallpapers/neigesombre16bits.png"
+      path: "mymedia/wallpapers/greenstars.png"
       quality: 56
       magnify: 100
       dithering: yes
