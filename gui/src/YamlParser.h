@@ -80,6 +80,7 @@ private:
     void parsePresets(const QString &content);
     void parsePages(const QString &content);
     void parseButton(YamlPage &page, const QString &buttonContent);
+    void parseStates(const QString &buttonContent, YamlButton &btn);
 };
 
 #endif // YAMLPARSER_H

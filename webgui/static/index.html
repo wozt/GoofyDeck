@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GoofyDeck Web</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>GoofyDeck</h1>
+      <p id="statusLine">Connexion...</p>
+    </div>
+    <nav>
+      <button id="pingBtn" title="Tester le daemon">Ping</button>
+      <button data-command="load-last-page" title="Recharger la page courante">Reload Page</button>
+      <button data-command="reload-config" title="Recharger la configuration">Reload Config</button>
+      <button data-command="stop-control" title="Mode miniapp">Stop</button>
+      <button data-command="start-control" title="Reprendre le contrôle">Start</button>
+    </nav>
+  </header>
+
+  <main class="shell">
+    <section class="deckPanel">
+      <div class="panelHead">
+        <select id="pageSelect" title="Page"></select>
+        <span id="pageMeta"></span>
+      </div>
+      <div id="deck" class="deck" aria-label="Boutons Ulanzi D200"></div>
+    </section>
+
+    <aside class="editorPanel">
+      <div class="tabs">
+        <button class="tab active" data-tab="button">Bouton</button>
+        <button class="tab" data-tab="yaml">YAML</button>
+        <button class="tab" data-tab="log">Log</button>
+      </div>
+
+      <section id="buttonTab" class="tabPage active">
+        <form id="buttonForm">
+          <div class="selectedTitle" id="selectedTitle">Sélectionne un bouton</div>
+          <label>Nom<input name="name" autocomplete="off"></label>
+          <label>Icône<input name="icon" autocomplete="off" placeholder="mdi:sofa"></label>
+          <label>Texte<input name="text" autocomplete="off"></label>
+          <label>Entity ID<input name="entity_id" autocomplete="off" placeholder="light.lampe"></label>
+          <label>Presets<select name="presets" id="presetsSelect"><option value="">-- Sélectionner --</option></select></label>
+          <label>Tap action<select name="tap_action" id="tapActionSelect"><option value="">-- Sélectionner --</option></select></label>
+          <label>Tap data / cmd<input name="tap_data" autocomplete="off" placeholder="salon"></label>
+          <div class="buttonRow">
+            <button type="submit">Enregistrer</button>
+            <button type="button" id="refreshBtn">Rafraîchir</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="yamlTab" class="tabPage">
+        <textarea id="yamlEditor" spellcheck="false"></textarea>
+        <div class="buttonRow">
+          <button id="saveYamlBtn">Sauver YAML</button>
+          <button id="reloadYamlBtn">Recharger</button>
+        </div>
+      </section>
+
+      <section id="logTab" class="tabPage">
+        <pre id="log"></pre>
+      </section>
+    </aside>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

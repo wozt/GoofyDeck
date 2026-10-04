@@ -29,6 +29,7 @@ private slots:
     void onIconChanged(const QString &icon);
     void onBrowseIcon();
     void onPresetChanged();
+    void validateAndAccept();
 
 private:
     void setupUI();

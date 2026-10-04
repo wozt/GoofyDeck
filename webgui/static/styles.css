@@ -1,0 +1,216 @@
+:root {
+  color-scheme: dark;
+  --bg: #101214;
+  --panel: #181c20;
+  --panel2: #20262b;
+  --line: #323a42;
+  --text: #eef2f5;
+  --muted: #9aa6b2;
+  --accent: #31c48d;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  background: #14181c;
+}
+
+h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+p { margin: 4px 0 0; color: var(--muted); }
+
+nav, .buttonRow, .panelHead, .tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+button, select, input, textarea {
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--text);
+  font: inherit;
+  border-radius: 6px;
+}
+
+button {
+  min-height: 36px;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+button:hover, button.active { border-color: var(--accent); }
+
+.shell {
+  display: grid;
+  grid-template-columns: minmax(420px, 720px) minmax(360px, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+
+.deckPanel, .editorPanel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.panelHead {
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+#pageSelect { min-width: 180px; min-height: 36px; padding: 0 10px; }
+#pageMeta { color: var(--muted); font-size: 13px; }
+
+.deck {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(68px, 1fr));
+  gap: 10px;
+  padding: 12px;
+}
+
+.deckButton {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  overflow: hidden;
+  background: #0c0f11;
+}
+
+.deckButton.wide {
+  grid-column: span 2;
+  aspect-ratio: 2 / 1;
+}
+
+.deckButton.selected { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.deckButton img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.deckButton .fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 4px 6px;
+  text-align: center;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 80;
+  font-family: "Roboto", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+  line-height: 1.1;
+  z-index: 2;
+  pointer-events: none;
+  letter-spacing: 0.3px;
+}
+
+.deckButton .badge {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,.7);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 3;
+}
+
+.editorPanel { min-height: 640px; }
+
+.tabs {
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabPage { display: none; padding: 12px; }
+.tabPage.active { display: block; }
+
+form {
+  display: grid;
+  gap: 10px;
+}
+
+.selectedTitle {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+}
+
+textarea {
+  width: 100%;
+  height: min(70vh, 680px);
+  padding: 12px;
+  resize: vertical;
+  font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+pre {
+  height: min(70vh, 680px);
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  background: #0c0f11;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: #b7f7cf;
+  font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@media (max-width: 900px) {
+  .topbar { align-items: flex-start; flex-direction: column; }
+  .shell { grid-template-columns: 1fr; }
+  .deck { gap: 8px; }
+}

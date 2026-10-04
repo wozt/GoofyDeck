@@ -4,6 +4,7 @@
 #include "ButtonEditDialog.h"
 #include "PageCreateDialog.h"
 #include "YamlHighlighter.h"
+#include "Config.h"
 #include <QMenuBar>
 #include <QToolBar>
 #include <QStatusBar>
@@ -33,14 +34,38 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_client(new GoofyDeckClient(this))
-    , m_configPath("../config/configuration.yml")
+    , m_configPath(Config::instance().configPath())
 {
     setupUI();
     setupConnections();
     loadConfiguration();
     
     setWindowTitle("GoofyDeck GUI");
-    resize(900, 700);
+    
+    // Use smaller size for streamdeck-like devices
+    int defaultWidth = 600;
+    int defaultHeight = 500;
+    
+    // Check for custom size from environment
+    if (qEnvironmentVariableIsSet("GOOFYDECK_WIDTH")) {
+        bool ok;
+        int w = qEnvironmentVariableIntValue("GOOFYDECK_WIDTH", &ok);
+        if (ok) defaultWidth = w;
+    }
+    if (qEnvironmentVariableIsSet("GOOFYDECK_HEIGHT")) {
+        bool ok;
+        int h = qEnvironmentVariableIntValue("GOOFYDECK_HEIGHT", &ok);
+        if (ok) defaultHeight = h;
+    }
+    
+    resize(defaultWidth, defaultHeight);
+    
+    // Use fixed or resizable window based on config
+    if (Config::instance().useFixedSize()) {
+        setFixedSize(defaultWidth, defaultHeight);
+    } else {
+        setMinimumSize(defaultWidth, defaultHeight);
+    }
 }
 
 MainWindow::~MainWindow() = default;
@@ -141,7 +166,6 @@ void MainWindow::setupUI()
     // Set fixed size to fit content tightly
     // Deck: 556px wide, 390px tall + toolbar/status/tab = ~470px total
     resize(580, 520);
-    setFixedSize(580, 520);
 }
 
 void MainWindow::setupConnections()
@@ -497,6 +521,7 @@ void MainWindow::onPageChanged(int index)
     for (int i = 0; i < page.buttons.size() && i < 14; ++i) {
         const YamlButton &btn = page.buttons[i];
         qDebug() << "[onPageChanged] Button" << (i+1) << "name:" << btn.name << "action:" << btn.tapAction << "entityId:" << btn.entityId;
+        qDebug() << "[onPageChanged] Button" << (i+1) << "states count:" << btn.states.size();
         ButtonConfig config;
         config.name = btn.name;
         config.icon = btn.icon;
@@ -511,9 +536,36 @@ void MainWindow::onPageChanged(int index)
         // Register button for state tracking (HA entities, sensors)
         if (!btn.entityId.isEmpty()) {
             QStringList presets;
-            for (const auto &state : btn.states.keys()) {
-                presets << btn.states[state].presets;
+            
+            // Add all state configs to StateManager
+            for (auto it = btn.states.begin(); it != btn.states.end(); ++it) {
+                const QString &stateKey = it.key();
+                const StateConfig &stateConfig = it.value();
+                
+                qDebug() << "[onPageChanged] Adding state config for button" << (i+1) 
+                         << "state:" << stateKey << "icon:" << stateConfig.icon;
+                
+                m_deckWidget->addStateConfig(i + 1, pageName, stateKey, stateConfig);
+                
+                // Collect presets from all states
+                for (const QString &preset : stateConfig.presets) {
+                    if (!presets.contains(preset)) {
+                        presets.append(preset);
+                    }
+                }
             }
+            
+            // Also add base presets
+            for (const QString &preset : btn.presets) {
+                if (!presets.contains(preset)) {
+                    presets.append(preset);
+                }
+            }
+            
+            qDebug() << "[onPageChanged] Registering button" << (i+1) 
+                     << "for state tracking, entity:" << btn.entityId 
+                     << "presets:" << presets;
+            
             m_deckWidget->registerButtonForStateTracking(i + 1, pageName, btn.entityId, presets);
         }
     }
@@ -543,6 +595,8 @@ void MainWindow::onDeckPageChanged(const QString &pageName)
     // Update button configs from page data AND update UI
     for (int i = 0; i < page.buttons.size() && i < 14; ++i) {
         const YamlButton &btn = page.buttons[i];
+        qDebug() << "[onDeckPageChanged] Button" << (i+1) << "name:" << btn.name << "action:" << btn.tapAction << "entityId:" << btn.entityId;
+        qDebug() << "[onDeckPageChanged] Button" << (i+1) << "states count:" << btn.states.size();
         ButtonConfig config;
         config.name = btn.name;
         config.icon = btn.icon;
@@ -557,9 +611,36 @@ void MainWindow::onDeckPageChanged(const QString &pageName)
         // Register button for state tracking (HA entities, sensors)
         if (!btn.entityId.isEmpty()) {
             QStringList presets;
-            for (const auto &state : btn.states.keys()) {
-                presets << btn.states[state].presets;
+            
+            // Add all state configs to StateManager
+            for (auto it = btn.states.begin(); it != btn.states.end(); ++it) {
+                const QString &stateKey = it.key();
+                const StateConfig &stateConfig = it.value();
+                
+                qDebug() << "[onDeckPageChanged] Adding state config for button" << (i+1) 
+                         << "state:" << stateKey << "icon:" << stateConfig.icon;
+                
+                m_deckWidget->addStateConfig(i + 1, pageName, stateKey, stateConfig);
+                
+                // Collect presets from all states
+                for (const QString &preset : stateConfig.presets) {
+                    if (!presets.contains(preset)) {
+                        presets.append(preset);
+                    }
+                }
             }
+            
+            // Also add base presets
+            for (const QString &preset : btn.presets) {
+                if (!presets.contains(preset)) {
+                    presets.append(preset);
+                }
+            }
+            
+            qDebug() << "[onDeckPageChanged] Registering button" << (i+1) 
+                     << "for state tracking, entity:" << btn.entityId 
+                     << "presets:" << presets;
+            
             m_deckWidget->registerButtonForStateTracking(i + 1, pageName, btn.entityId, presets);
         }
     }

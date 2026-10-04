@@ -26,6 +26,7 @@ set(SOURCES
     src/PresetEditDialog.cpp
     src/HaClient.cpp
     src/StateManager.cpp
+    src/Config.cpp
 )
 
 set(HEADERS
@@ -44,6 +45,7 @@ set(HEADERS
     src/PresetEditDialog.h
     src/HaClient.h
     src/StateManager.h
+    src/Config.h
 )
 
 add_executable(goofydeck-gui ${SOURCES} ${HEADERS})

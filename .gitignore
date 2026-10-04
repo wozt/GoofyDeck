@@ -69,3 +69,6 @@ standalone/draw_optimize_std
 
 # Test artifacts
 test_*/
+
+# Build directories
+gui/build/

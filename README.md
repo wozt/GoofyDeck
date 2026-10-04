@@ -36,6 +36,7 @@ The new `install.sh` provides a fully interactive installation experience:
 - **🔨 Dependencies**: Automatic system dependencies installation
 - **⚡ Compilation**: Binary compilation when needed
 - **🚀 Systemd Service**: Optional auto-start service installation
+- **🌐 Web GUI**: Optional web interface installation with Python dependencies
 - **⚡ Performance**: RPI Zero 2W optimization
 
 ### 🎨 MDI Icons Download Options
@@ -123,7 +124,7 @@ This handles everything automatically:
 ### Option 2: Manual Build
 ```bash
 # Install dependencies manually (see install.sh for details)
-sudo apt install build-essential pkg-config git libhidapi-dev libusb-1.0-0-dev zlib1g-dev libpng-dev libyaml-dev libssl-dev ffmpeg libavformat-dev libavcodec-dev libavutil-dev libswscale-dev imagemagick librsvg2-bin librsvg2-dev libcairo2-dev libusb-dev jq bc netcat-openbsd socat fonts-noto-core fonts-noto-color-emoji
+sudo apt install build-essential pkg-config git libhidapi-dev libusb-1.0-0-dev zlib1g-dev libpng-dev libyaml-dev libssl-dev ffmpeg libavformat-dev libavcodec-dev libavutil-dev libswscale-dev imagemagick librsvg2-bin librsvg2-dev libcairo2-dev libusb-dev jq bc netcat-openbsd socat fonts-noto-core fonts-noto-color-emoji python3 python3-pip python3-yaml
 
 # Build binaries
 make all
@@ -151,6 +152,9 @@ sudo journalctl -u goofydeck -f
 # Background mode
 ./launch_stack.sh
 
+# Background mode with web-gui
+./launch_stack.sh --web-gui
+
 # Stop all processes
 ./launch_stack.sh --kill
 ```
@@ -161,6 +165,45 @@ Manual:
 ./ulanzi_d200_daemon
 ./bin/paging_daemon
 ./bin/ha_daemon
+```
+
+### Web GUI
+
+GoofyDeck includes a web-based interface for controlling and configuring your device:
+
+**Launch with web-gui:**
+```bash
+./launch_stack.sh --web-gui
+```
+
+Then open `http://127.0.0.1:8765` in your browser.
+
+**Web GUI Features:**
+- 🎛️ **Interactive 14-button grid** matching the Ulanzi D200 layout
+- 🖱️ **Button events**: Click (TAP), Shift+click (HOLD), Alt+click (LONGHOLD), right-click (RELEASED)
+- 📡 **Real-time updates** via Server-Sent Events for page changes, YAML updates, and icon rendering
+- 🎨 **Direct YAML editing** with structured button editing
+- 🔧 **Daemon commands**: ping, load-last-page, reload-config, stop-control, start-control
+- 📱 **Responsive design** works on desktop and mobile
+
+**Configuration:**
+```bash
+# Web GUI host (default: 127.0.0.1)
+export GOOFYDECK_WEB_HOST=0.0.0.0
+
+# Web GUI port (default: 8765)
+export GOOFYDECK_WEB_PORT=8765
+
+# Config path (default: config/configuration.yml)
+export GOOFYDECK_CONFIG=/path/to/configuration.yml
+
+# Paging socket (default: /tmp/goofydeck_paging_control.sock)
+export GOOFYDECK_PAGING_SOCKET=/tmp/goofydeck_paging_control.sock
+```
+
+**Manual web-gui launch:**
+```bash
+python3 webgui/server.py --host 127.0.0.1 --port 8765
 ```
 
 ## 🛠️ Troubleshooting
@@ -235,6 +278,27 @@ The installer can download additional fonts for better text rendering in your pa
 - Ulanzi device daemon: `/tmp/ulanzi_device.sock`
 - Paging control socket: `/tmp/goofydeck_paging_control.sock`
 - Home Assistant daemon: `/tmp/goofydeck_ha.sock`
+
+## User Interfaces
+
+GoofyDeck provides multiple ways to interact with your Ulanzi D200:
+
+### 1. Web GUI (Recommended)
+- **Access**: Browser-based interface at `http://127.0.0.1:8765`
+- **Features**: Real-time button grid, YAML editing, structured button configuration
+- **Launch**: `./launch_stack.sh --web-gui`
+- **Requirements**: Python 3 with PyYAML
+
+### 2. Qt6 GUI (Desktop)
+- **Access**: Native desktop application
+- **Features**: Interactive deck control, YAML editor, event logging
+- **Launch**: `./gui/build/goofydeck-gui` (after building with `make gui`)
+- **Requirements**: Qt6 development libraries
+
+### 3. Hardware Device
+- **Access**: Physical Ulanzi D200 device
+- **Features**: Direct button interaction, real-time display updates
+- **Integration**: All GUIs control the same physical device
 
 ## Configuration
 

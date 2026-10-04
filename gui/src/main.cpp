@@ -1,5 +1,12 @@
 #include <QApplication>
 #include "MainWindow.h"
+#include "Config.h"
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(guiLog, "goofydeck.gui")
+Q_LOGGING_CATEGORY(networkLog, "goofydeck.network")
+Q_LOGGING_CATEGORY(configLog, "goofydeck.config")
+Q_LOGGING_CATEGORY(parserLog, "goofydeck.parser")
 
 int main(int argc, char *argv[])
 {
@@ -7,6 +14,18 @@ int main(int argc, char *argv[])
     
     app.setApplicationName("GoofyDeck GUI");
     app.setOrganizationName("goofydeck");
+    
+    // Configure logging based on Config
+    if (!Config::instance().enableDebugLogging()) {
+        // Disable debug logging by default
+        QLoggingCategory::setFilterRules("*.debug=false\n*.info=false\nqt.*.debug=false\nqt.*.info=false");
+    } else {
+        // Enable all logging in debug mode
+        QLoggingCategory::setFilterRules("*.debug=true");
+    }
+    
+    // Disable Qt-specific verbose logging
+    QLoggingCategory::setFilterRules("qt.qpa.input.events.debug=false\nqt.pointer.velocity.debug=false\nqt.qpa.events.debug=false\nqt.widgets.painting.debug=false\nqt.widgets.focus.debug=false");
     
     // Set dark theme
     app.setStyleSheet(R"(

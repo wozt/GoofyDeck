@@ -1,4 +1,5 @@
 #include "GoofyDeckClient.h"
+#include "Config.h"
 #include <QLocalSocket>
 #include <QDebug>
 
@@ -15,7 +16,7 @@ QString ButtonEvent::toString() const
 
 GoofyDeckClient::GoofyDeckClient(QObject *parent)
     : QObject(parent)
-    , m_socketPath("/tmp/goofydeck_paging_control.sock")
+    , m_socketPath(Config::instance().pagingSocketPath())
 {
 }
 
@@ -34,6 +35,10 @@ bool GoofyDeckClient::ping() const
 
 bool GoofyDeckClient::sendCommand(const QString &command, QString *response, int timeoutMs)
 {
+    if (timeoutMs <= 0) {
+        timeoutMs = Config::instance().socketTimeoutMs();
+    }
+    
     QLocalSocket socket;
     socket.connectToServer(m_socketPath);
     

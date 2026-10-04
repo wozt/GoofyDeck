@@ -1,4 +1,5 @@
 #include "ButtonWidget.h"
+#include "Config.h"
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
@@ -95,8 +96,10 @@ void ButtonWidget::loadLabelStyle()
     int fontWeight = 80;
     m_labelAlign = "bottom"; // Default alignment
     
-    // Try to load from JSON file
+    // Try to load from JSON file using Config
+    QString assetsPath = Config::instance().assetsPath();
     QStringList possiblePaths;
+    possiblePaths << assetsPath + "/json/default.json";
     possiblePaths << "../assets/json/default.json";
     possiblePaths << "../../assets/json/default.json";
     possiblePaths << "./assets/json/default.json";

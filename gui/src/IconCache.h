@@ -62,6 +62,10 @@ public:
                                          int textSize = 40,
                                          int textOffsetX = 0, int textOffsetY = 0);
     
+    // Regenerate icon with text for sensor values (like paging.c does)
+    QPixmap regenerateSensorIcon(int buttonIndex, const QString &pageName, 
+                                 const QString &text, const QString &baseIcon = QString());
+    
     // Find wp_comp directory for a specific page
     QString findWpCompDirForPage(const QString &pageName) const;
     

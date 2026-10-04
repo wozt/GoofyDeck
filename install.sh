@@ -366,7 +366,8 @@ install_dependencies() {
         libyaml-dev libssl-dev ffmpeg libavformat-dev libavcodec-dev \
         libavutil-dev libswscale-dev imagemagick librsvg2-bin \
         librsvg2-dev libcairo2-dev libusb-dev jq bc netcat-openbsd \
-        socat fonts-noto-core fonts-noto-color-emoji sox sonic-pi
+        socat fonts-noto-core fonts-noto-color-emoji sox sonic-pi \
+        python3 python3-pip python3-yaml
       ;;
     arch)
       log "Installing Arch Linux dependencies..."
@@ -430,6 +431,63 @@ compile_gui() {
   fi
 }
 
+# Step 6c: Web GUI Setup
+setup_web_gui() {
+  log "Step 6c: Web GUI Setup"
+  echo "======================"
+  
+  # Check if Python 3 is available
+  if ! command -v python3 >/dev/null 2>&1; then
+    log_warning "Python 3 not found. Web GUI requires Python 3."
+    return 0
+  fi
+  
+  # Check if PyYAML is installed
+  if python3 -c "import yaml" 2>/dev/null; then
+    log "PyYAML already installed, skipping web-gui dependencies"
+    return 0
+  fi
+  
+  read -p "Setup Web GUI dependencies (Python PyYAML)? [Y/n]: " setup_webgui
+  if [[ "${setup_webgui}" =~ ^[Nn]*$ ]]; then
+    log "Skipping Web GUI setup"
+    return 0
+  fi
+  
+  log "Installing PyYAML for Web GUI..."
+  
+  # Try pip3 first, then pip
+  if command -v pip3 >/dev/null 2>&1; then
+    pip3 install pyyaml
+  elif command -v pip >/dev/null 2>&1; then
+    pip install pyyaml
+  else
+    log_warning "pip not found. Trying to install via package manager..."
+    local platform
+    platform=$(detect_platform)
+    case "${platform}" in
+      debian)
+        sudo apt install -y python3-yaml
+        ;;
+      arch)
+        sudo pacman -S --needed python-yaml
+        ;;
+      *)
+        log_warning "Cannot install PyYAML automatically. Please install manually: pip3 install pyyaml"
+        return 0
+        ;;
+    esac
+  fi
+  
+  # Verify installation
+  if python3 -c "import yaml" 2>/dev/null; then
+    log_success "PyYAML installed successfully"
+    log "Web GUI is ready to use with: ./launch_stack.sh --web-gui"
+  else
+    log_warning "PyYAML installation may have failed. Web GUI may not work properly."
+  fi
+}
+
 # Step 7: Systemd Service
 setup_systemd_service() {
   log "Step 7: Systemd Service"
@@ -449,6 +507,16 @@ setup_systemd_service() {
   
   log "Installing systemd service..."
   export ENABLE_SYSTEMD="true"
+  
+  # Ask about web-gui inclusion in service
+  read -p "Include Web GUI in systemd service? [y/N]: " include_webgui
+  if [[ "${include_webgui}" =~ ^[Yy]*$ ]]; then
+    export ENABLE_WEBGUI="true"
+    log "Web GUI will be included in systemd service"
+  else
+    export ENABLE_WEBGUI="false"
+    log "Web GUI will not be included in systemd service"
+  fi
   
   # Create a daemon script that keeps processes running
   local daemon_script="${ROOT}/goofydeck-daemon.sh"
@@ -472,10 +540,13 @@ start_daemon() {
     if [ -f "${pid_file}" ] && kill -0 "$(cat "${pid_file}")" 2>/dev/null; then
         echo "${name} already running (PID: $(cat "${pid_file}"))"
         return 0
+    else
+        # Remove stale pid file
+        rm -f "${pid_file}"
     fi
     
     echo "Starting ${name}..."
-    nohup bash -c "${cmd}" > /dev/null 2>&1 &
+    nohup bash -c "${cmd}" > "${ROOT}/pids/${name}.log" 2>&1 &
     echo $! > "${pid_file}"
     echo "${name} started (PID: $(cat "${pid_file}"))"
 }
@@ -507,7 +578,19 @@ stop_daemon() {
     fi
 }
 
-# Function to check daemon status
+# Function to check daemon status (silent version for scripts)
+check_daemon_silent() {
+    local name="$1"
+    local pid_file="${PIDS_DIR}/${name}.pid"
+    
+    if [ -f "${pid_file}" ] && kill -0 "$(cat "${pid_file}")" 2>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Function to check daemon status (verbose version)
 check_daemon() {
     local name="$1"
     local pid_file="${PIDS_DIR}/${name}.pid"
@@ -527,6 +610,9 @@ cleanup() {
     stop_daemon "ulanzi_d200_daemon"
     stop_daemon "ha_daemon"
     stop_daemon "paging_daemon"
+    if [ "${ENABLE_WEBGUI:-false}" = "true" ]; then
+        stop_daemon "webgui"
+    fi
     exit 0
 }
 
@@ -539,6 +625,14 @@ start_daemon "ha_daemon" "cd '${ROOT}' && ./bin/ha_daemon"
 sleep 2
 start_daemon "paging_daemon" "cd '${ROOT}' && ./bin/paging_daemon"
 
+# Start web-gui if enabled
+if [ "${ENABLE_WEBGUI:-false}" = "true" ]; then
+    sleep 2
+    start_daemon "webgui" "cd '${ROOT}' && python3 webgui/server.py --host 0.0.0.0 --port 8765"
+else
+    echo "Web GUI disabled in configuration"
+fi
+
 echo "All daemons started. Monitoring..."
 
 # Keep running and monitor daemons
@@ -546,20 +640,36 @@ while true; do
     sleep 30
     
     # Check if daemons are still running, restart if needed
-    if ! check_daemon "ulanzi_d200_daemon"; then
+    if ! check_daemon_silent "ulanzi_d200_daemon"; then
         echo "Restarting ulanzi_d200_daemon..."
         start_daemon "ulanzi_d200_daemon" "cd '${ROOT}' && ./ulanzi_d200_daemon"
     fi
     
-    if ! check_daemon "ha_daemon"; then
+    if ! check_daemon_silent "ha_daemon"; then
         echo "Restarting ha_daemon..."
         start_daemon "ha_daemon" "cd '${ROOT}' && ./bin/ha_daemon"
     fi
     
-    if ! check_daemon "paging_daemon"; then
+    if ! check_daemon_silent "paging_daemon"; then
         echo "Restarting paging_daemon..."
         start_daemon "paging_daemon" "cd '${ROOT}' && ./bin/paging_daemon"
     fi
+    
+    # Start web-gui if enabled
+    if [ "${ENABLE_WEBGUI:-false}" = "true" ]; then
+        if ! check_daemon_silent "webgui"; then
+            echo "Starting webgui..."
+            start_daemon "webgui" "cd '${ROOT}' && python3 webgui/server.py --host 0.0.0.0 --port 8765"
+        fi
+    else
+        # Stop web-gui if running but disabled
+        if check_daemon_silent "webgui"; then
+            echo "Stopping webgui (disabled in configuration)..."
+            stop_daemon "webgui"
+        fi
+    fi
+    
+    sleep 10
 done
 EOF
 
@@ -575,6 +685,7 @@ Type=simple
 User=$(whoami)
 WorkingDirectory=${ROOT}
 Environment=HOME=$(dirname "${ROOT}")
+Environment=ENABLE_WEBGUI=${ENABLE_WEBGUI:-false}
 ExecStart=${daemon_script}
 ExecReload=/bin/kill -HUP \$MAINPID
 KillMode=mixed
@@ -650,6 +761,8 @@ main() {
   compile_binaries
   echo
   compile_gui
+  echo
+  setup_web_gui
   echo
   setup_systemd_service
   echo

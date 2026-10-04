@@ -32,9 +32,20 @@ DeckWidget::DeckWidget(GoofyDeckClient *client, QWidget *parent)
     connect(m_stateManager, &StateManager::buttonNeedsRefresh,
             this, &DeckWidget::onButtonNeedsRefresh);
     
+    // Connect icon cache signals for current/ directory updates
+    connect(m_iconCache, &IconCache::iconUpdated,
+            this, &DeckWidget::onIconUpdated);
+    
     // Try to connect to HA daemon
     if (m_haClient->isConfigured()) {
-        m_haClient->connectToDaemon();
+        qDebug() << "[DeckWidget] HA client is configured, attempting to connect...";
+        if (m_haClient->connectToDaemon()) {
+            qDebug() << "[DeckWidget] HA client connected successfully";
+        } else {
+            qDebug() << "[DeckWidget] HA client failed to connect";
+        }
+    } else {
+        qDebug() << "[DeckWidget] HA client is not configured";
     }
     
     // Try to find session cache
@@ -260,6 +271,9 @@ void DeckWidget::onPageChanged(const QString &pageName, int offset)
     // Subscribe to new page entities after a short delay
     QTimer::singleShot(200, [this, pageName]() {
         m_stateManager->subscribePageEntities(pageName);
+        
+        // Preload state icons for this page
+        preloadStateIcons(pageName);
     });
     
     // Notify MainWindow so it can reload button configs
@@ -272,6 +286,14 @@ void DeckWidget::registerButtonForStateTracking(int buttonIndex, const QString &
     if (!m_stateManager) return;
     
     m_stateManager->registerButton(buttonIndex, pageName, entityId, allPresets);
+}
+
+void DeckWidget::addStateConfig(int buttonIndex, const QString &pageName,
+                                const QString &stateValue, const StateConfig &config)
+{
+    if (!m_stateManager) return;
+    
+    m_stateManager->addStateConfig(buttonIndex, pageName, stateValue, config);
 }
 
 void DeckWidget::setupStateTracking()
@@ -296,17 +318,19 @@ void DeckWidget::onButtonStateChanged(int buttonIndex, const QString &pageName, 
 {
     if (pageName != m_currentPage) return;
     
-    qDebug() << "[DeckWidget] Button" << buttonIndex << "state changed to" << newState;
-    
     // Reload icon for this button with the new state
     updateButtonStateIcon(buttonIndex, newState);
+    
+    // Also update button name if state has a name override
+    StateConfig stateConfig = m_stateManager->getStateConfig(buttonIndex, pageName, newState);
+    if (!stateConfig.name.isEmpty()) {
+        m_buttons[buttonIndex - 1]->setButtonName(stateConfig.name);
+    }
 }
 
 void DeckWidget::onButtonTextChanged(int buttonIndex, const QString &pageName, const QString &newText)
 {
     if (pageName != m_currentPage) return;
-    
-    qDebug() << "[DeckWidget] Button" << buttonIndex << "text changed to" << newText;
     
     // Update button label with new text (for sensors)
     if (buttonIndex >= 1 && buttonIndex <= BUTTON_COUNT) {
@@ -323,7 +347,19 @@ void DeckWidget::onButtonTextChanged(int buttonIndex, const QString &pageName, c
             btn->setButtonName(currentName);
         }
         
-        // Also refresh the icon to show text overlay
+        // Regenerate icon with text overlay for sensors
+        if (!newText.isEmpty() && m_iconCache) {
+            QString iconName = getButtonIconName(buttonIndex);
+            QPixmap regeneratedIcon = m_iconCache->regenerateSensorIcon(buttonIndex, pageName, newText, iconName);
+            if (!regeneratedIcon.isNull()) {
+                qDebug() << "[Icon] Regenerated sensor icon for button" << buttonIndex;
+                m_buttons[buttonIndex - 1]->setButtonPixmap(regeneratedIcon);
+                m_buttons[buttonIndex - 1]->repaint();
+                return;
+            }
+        }
+        
+        // Fallback: refresh the icon
         refreshButtonIcon(buttonIndex);
     }
 }
@@ -392,6 +428,11 @@ void DeckWidget::loadButtonIcon(int buttonIndex)
         pix = m_iconCache->getComposedIcon(buttonIndex, iconName, m_currentPage);
     }
     
+    // If still null, try to load state-specific icon from cache
+    if (pix.isNull() && !stateValue.isEmpty()) {
+        pix = m_iconCache->getComposedIconForState(buttonIndex, iconName, m_currentPage, stateValue);
+    }
+    
     // Final fallback to wallpaper tile
     if (pix.isNull() || pix.width() == 0) {
         pix = m_iconCache->getWallpaperTile(buttonIndex, m_currentPage);
@@ -426,5 +467,33 @@ void DeckWidget::updateButtonStateIcon(int buttonIndex, const QString &stateValu
     } else {
         // Fallback: refresh with regular icon
         loadButtonIcon(buttonIndex);
+    }
+    
+    // Force widget repaint
+    m_buttons[buttonIndex - 1]->repaint();
+}
+
+void DeckWidget::preloadStateIcons(const QString &pageName)
+{
+    if (!m_iconCache || !m_iconCache->hasSessionCache()) return;
+    
+    qDebug() << "[DeckWidget] Preloading state icons for page" << pageName;
+    
+    // Preload icons for common states (on/off) for all buttons
+    QStringList commonStates = {"on", "off", "open", "closed", "home", "not_home"};
+    
+    for (int i = 1; i <= BUTTON_COUNT; ++i) {
+        QString iconName = getButtonIconName(i);
+        if (iconName.isEmpty()) continue;
+        
+        // Check if this button has state configs
+        if (m_stateManager->hasStateBasedIcon(i, pageName)) {
+            for (const QString &state : commonStates) {
+                QPixmap pix = m_iconCache->getComposedIconForState(i, iconName, pageName, state);
+                if (!pix.isNull()) {
+                    qDebug() << "[DeckWidget] Preloaded icon for button" << i << "state" << state;
+                }
+            }
+        }
     }
 }

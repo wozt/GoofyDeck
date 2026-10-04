@@ -1,4 +1,5 @@
 #include "YamlParser.h"
+#include "Config.h"
 #include <QFile>
 #include <QTextStream>
 #include <QRegularExpression>
@@ -27,6 +28,11 @@ bool YamlParser::parseString(const QString &content)
     m_pages.clear();
     m_presets.clear();
     
+    if (content.isEmpty()) {
+        qWarning() << "[YamlParser] Empty content provided";
+        return false;
+    }
+    
     // Simple YAML parsing - extract key values
     QRegularExpression brightnessRe("^brightness:\\s*(\\d+)");
     QRegularExpressionMatch brightnessMatch = brightnessRe.match(content);
@@ -40,6 +46,11 @@ bool YamlParser::parseString(const QString &content)
     // Extract pages - look for "pages:" section
     parsePages(content);
     
+    if (m_pages.isEmpty()) {
+        qWarning() << "[YamlParser] No pages found in configuration";
+        return false;
+    }
+    
     return true;
 }
 
@@ -48,7 +59,6 @@ void YamlParser::parsePresets(const QString &content)
     // Find presets: section
     int presetsPos = content.indexOf("presets:");
     if (presetsPos == -1) {
-        qDebug() << "[YamlParser] No 'presets:' section found";
         return;
     }
     
@@ -70,10 +80,7 @@ void YamlParser::parsePresets(const QString &content)
         
         // Store preset name (we can store properties later if needed)
         m_presets[presetName] = QVariantMap();
-        qDebug() << "[YamlParser] Found preset:" << presetName;
     }
-    
-    qDebug() << "[YamlParser] Total presets parsed:" << m_presets.size();
 }
 
 void YamlParser::parsePages(const QString &content)
@@ -81,7 +88,6 @@ void YamlParser::parsePages(const QString &content)
     // Find pages: section
     int pagesPos = content.indexOf("pages:");
     if (pagesPos == -1) {
-        qDebug() << "[YamlParser] No 'pages:' section found";
         return;
     }
     
@@ -89,8 +95,6 @@ void YamlParser::parsePages(const QString &content)
     
     // Split into lines
     QStringList lines = pagesSection.split('\n');
-    
-    qDebug() << "[YamlParser] Parsing" << lines.size() << "lines from pages section";
     
     YamlPage currentPage;
     QString currentButtonSection;
@@ -114,7 +118,6 @@ void YamlParser::parsePages(const QString &content)
                 if (inButton && !currentButtonSection.isEmpty()) {
                     parseButton(currentPage, currentButtonSection);
                 }
-                qDebug() << "[YamlParser] Adding page:" << currentPage.name << "with" << currentPage.buttons.size() << "buttons";
                 m_pages.append(currentPage);
             }
             
@@ -129,7 +132,6 @@ void YamlParser::parsePages(const QString &content)
             int colonPos = lineContent.indexOf(':');
             if (colonPos > 0) {
                 currentPage.name = lineContent.left(colonPos).trimmed();
-                qDebug() << "[YamlParser] Found page:" << currentPage.name;
             }
         }
         // Button definition (6 spaces indent followed by - name:)
@@ -150,7 +152,6 @@ void YamlParser::parsePages(const QString &content)
                 inButton = true;
                 currentButtonSection = trimmed + "\n";
                 buttonIndentLevel = indent;
-                qDebug() << "[YamlParser] Found button at line" << i << ":" << trimmed.left(50);
             } else if (inButton && indent >= buttonIndentLevel) {
                 currentButtonSection += line + "\n";
             }
@@ -161,7 +162,6 @@ void YamlParser::parsePages(const QString &content)
         }
         // End of pages section (less indent)
         else if (indent < 2 && !line.mid(indent).isEmpty() && !line.mid(indent).startsWith('#')) {
-            qDebug() << "[YamlParser] End of pages section at line" << i;
             break;
         }
     }
@@ -171,11 +171,8 @@ void YamlParser::parsePages(const QString &content)
         if (inButton && !currentButtonSection.isEmpty()) {
             parseButton(currentPage, currentButtonSection);
         }
-        qDebug() << "[YamlParser] Adding final page:" << currentPage.name << "with" << currentPage.buttons.size() << "buttons";
         m_pages.append(currentPage);
     }
-    
-    qDebug() << "[YamlParser] Total pages parsed:" << m_pages.size();
 }
 
 QStringList YamlParser::pageNames() const
@@ -211,6 +208,13 @@ void YamlParser::parseButton(YamlPage &page, const QString &buttonContent)
     match = iconRe.match(buttonContent);
     if (match.hasMatch()) {
         btn.icon = match.captured(1).trimmed();
+    }
+    
+    // Extract entity_id
+    QRegularExpression entityRe("entity_id:\\s*(\\S+)");
+    match = entityRe.match(buttonContent);
+    if (match.hasMatch()) {
+        btn.entityId = match.captured(1).trimmed();
     }
     
     // Extract presets - handle both formats:
@@ -253,13 +257,17 @@ void YamlParser::parseButton(YamlPage &page, const QString &buttonContent)
         }
     }
     
-    // If no icon found, try to extract from states
-    if (btn.icon.isEmpty()) {
-        // Look for states section with presets that have icons
-        QRegularExpression stateIconRe("states:[\\s\\S]*?(?:on|\"on\"):[\\s\\S]*?icon:\\s*(\\S+)");
-        match = stateIconRe.match(buttonContent);
-        if (match.hasMatch()) {
-            btn.icon = match.captured(1).trimmed();
+    // Parse states section if present
+    parseStates(buttonContent, btn);
+    
+    // If no icon found, try to extract from states (fallback for old configs)
+    if (btn.icon.isEmpty() && !btn.states.isEmpty()) {
+        // Try to get icon from first state (usually "on")
+        for (auto it = btn.states.begin(); it != btn.states.end(); ++it) {
+            if (!it.value().icon.isEmpty()) {
+                btn.icon = it.value().icon;
+                break;
+            }
         }
     }
     
@@ -332,11 +340,104 @@ void YamlParser::parseButton(YamlPage &page, const QString &buttonContent)
     page.buttons.append(btn);
 }
 
+void YamlParser::parseStates(const QString &buttonContent, YamlButton &btn)
+{
+    // Find states: section
+    int statesPos = buttonContent.indexOf("states:");
+    if (statesPos == -1) {
+        return;
+    }
+    
+    // Extract the states section content
+    QString statesSection = buttonContent.mid(statesPos + 7); // Skip "states:"
+    
+    // Find end of states section (next top-level key in button or end)
+    int statesEnd = statesSection.indexOf(QRegularExpression("\n[a-zA-Z_][a-zA-Z0-9_]*:"));
+    if (statesEnd == -1) {
+        statesEnd = statesSection.length();
+    }
+    statesSection = statesSection.left(statesEnd);
+    
+    // Parse individual states (indented by 4 spaces relative to states:)
+    // Format:
+    //   states:
+    //     on:
+    //       icon: mdi:lightbulb
+    //       name: "Light On"
+    //     off:
+    //       icon: mdi:lightbulb-off
+    
+    QRegularExpression stateRe("\\n    ([a-zA-Z_][a-zA-Z0-9_]*):");
+    QRegularExpressionMatchIterator stateIter = stateRe.globalMatch(statesSection);
+    
+    while (stateIter.hasNext()) {
+        QRegularExpressionMatch stateMatch = stateIter.next();
+        QString stateKey = stateMatch.captured(1);
+        
+        // Extract the content for this state
+        int stateStart = stateMatch.capturedStart();
+        int stateEnd = statesSection.indexOf(QRegularExpression("\\n    [a-zA-Z_][a-zA-Z0-9_]*:"), stateStart + 1);
+        if (stateEnd == -1) {
+            stateEnd = statesSection.length();
+        }
+        QString stateContent = statesSection.mid(stateStart, stateEnd - stateStart);
+        
+        StateConfig config;
+        config.stateValue = stateKey;
+        
+        // Extract icon
+        QRegularExpression iconRe("icon:\\s*(\\S+)");
+        QRegularExpressionMatch iconMatch = iconRe.match(stateContent);
+        if (iconMatch.hasMatch()) {
+            config.icon = iconMatch.captured(1).trimmed();
+        }
+        
+        // Extract name
+        QRegularExpression nameRe("name:\\s*\"?([^\"\\n]+)\"?");
+        QRegularExpressionMatch nameMatch = nameRe.match(stateContent);
+        if (nameMatch.hasMatch()) {
+            config.name = nameMatch.captured(1).trimmed();
+        }
+        
+        // Extract preset
+        QRegularExpression presetRe("preset:\\s*(\\S+)");
+        QRegularExpressionMatch presetMatch = presetRe.match(stateContent);
+        if (presetMatch.hasMatch()) {
+            config.presets.append(presetMatch.captured(1).trimmed());
+        }
+        
+        // Extract presets list (if multiple)
+        QRegularExpression presetsListRe("presets:\\s*\\[([^\\]]+)\\]");
+        QRegularExpressionMatch presetsListMatch = presetsListRe.match(stateContent);
+        if (presetsListMatch.hasMatch()) {
+            QString presetsStr = presetsListMatch.captured(1);
+            QStringList presets = presetsStr.split(',');
+            for (QString preset : presets) {
+                preset = preset.trimmed();
+                if (preset.startsWith('"') && preset.endsWith('"')) {
+                    preset = preset.mid(1, preset.length() - 2);
+                }
+                if (!preset.isEmpty()) {
+                    config.presets.append(preset);
+                }
+            }
+        }
+        
+        // Extract text
+        QRegularExpression textRe("text:\\s*\"?([^\"\\n]+)\"?");
+        QRegularExpressionMatch textMatch = textRe.match(stateContent);
+        if (textMatch.hasMatch()) {
+            config.text = textMatch.captured(1).trimmed();
+        }
+        
+        btn.states[stateKey] = config;
+    }
+}
+
 bool YamlParser::saveToFile(const QString &filePath, const QString &content)
 {
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "[YamlParser] Failed to open file for writing:" << filePath;
         return false;
     }
     
@@ -344,7 +445,6 @@ bool YamlParser::saveToFile(const QString &filePath, const QString &content)
     stream << content;
     file.close();
     
-    qDebug() << "[YamlParser] Saved file:" << filePath;
     return true;
 }
 

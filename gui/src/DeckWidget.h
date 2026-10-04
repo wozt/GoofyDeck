@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QVector>
 #include "GoofyDeckClient.h"
+#include "YamlParser.h"
 
 class ButtonWidget;
 class GoofyDeckClient;
@@ -32,6 +33,8 @@ public:
     void updateButtonStateIcon(int buttonIndex, const QString &stateValue);
     void registerButtonForStateTracking(int buttonIndex, const QString &pageName,
                                           const QString &entityId, const QStringList &allPresets);
+    void addStateConfig(int buttonIndex, const QString &pageName,
+                        const QString &stateValue, const StateConfig &config);
 
 signals:
     void buttonTapped(int index);
@@ -58,6 +61,7 @@ private:
     void loadIconsFromCache();
     void loadButtonIcon(int buttonIndex);
     QString getButtonIconName(int buttonIndex) const;
+    void preloadStateIcons(const QString &pageName);
     
     GoofyDeckClient *m_client = nullptr;
     IconCache *m_iconCache = nullptr;

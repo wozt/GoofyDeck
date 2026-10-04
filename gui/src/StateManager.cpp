@@ -1,33 +1,40 @@
 #include "StateManager.h"
 #include "HaClient.h"
+#include "Config.h"
 #include <QFileSystemWatcher>
 #include <QTimer>
 #include <QFile>
 #include <QDir>
 #include <QDebug>
 #include <QRegularExpression>
+#include <QTextStream>
 
 StateManager::StateManager(QObject *parent)
     : QObject(parent)
 {
     m_pollTimer = new QTimer(this);
-    m_pollTimer->setInterval(500);
+    m_pollTimer->setInterval(Config::instance().pollingIntervalMs());
     connect(m_pollTimer, &QTimer::timeout, this, &StateManager::pollTextUpdates);
     
-    // Find session directory
-    QDir shmDir("/dev/shm");
-    if (shmDir.exists()) {
-        QString pagingDir = "/dev/shm/goofydeck/paging";
-        if (QDir(pagingDir).exists()) {
-            m_sessionDir = pagingDir;
-        } else {
-            // Try old structure
-            QStringList entries = shmDir.entryList(QStringList() << "goofydeck_*", QDir::Dirs);
-            if (!entries.isEmpty()) {
-                entries.sort();
-                QString candidate = shmDir.absoluteFilePath(entries.last()) + "/paging";
-                if (QDir(candidate).exists()) {
-                    m_sessionDir = candidate;
+    // Use Config to get session directory
+    m_sessionDir = Config::instance().sessionDir();
+    
+    // Find session directory if not configured
+    if (m_sessionDir.isEmpty() || !QDir(m_sessionDir).exists()) {
+        QDir shmDir("/dev/shm");
+        if (shmDir.exists()) {
+            QString pagingDir = "/dev/shm/goofydeck/paging";
+            if (QDir(pagingDir).exists()) {
+                m_sessionDir = pagingDir;
+            } else {
+                // Try old structure
+                QStringList entries = shmDir.entryList(QStringList() << "goofydeck_*", QDir::Dirs);
+                if (!entries.isEmpty()) {
+                    entries.sort();
+                    QString candidate = shmDir.absoluteFilePath(entries.last()) + "/paging";
+                    if (QDir(candidate).exists()) {
+                        m_sessionDir = candidate;
+                    }
                 }
             }
         }
@@ -52,6 +59,7 @@ StateManager::StateManager(QObject *parent)
     }
     
     qDebug() << "[StateManager] Session directory:" << m_sessionDir;
+    qDebug() << "[StateManager] Polling interval:" << m_pollTimer->interval() << "ms";
 }
 
 StateManager::~StateManager()
@@ -221,22 +229,24 @@ void StateManager::subscribePageEntities(const QString &pageName)
     m_currentPage = pageName;
     
     if (!m_haClient || !m_haClient->isConfigured()) {
-        qDebug() << "[StateManager] HA not configured, skipping subscription";
         return;
     }
     
+    if (!m_haClient->isConnected()) {
+        if (!m_haClient->connectToDaemon()) {
+            return;
+        }
+    }
+    
+    int subscribedCount = 0;
     for (auto it = m_buttonStates.begin(); it != m_buttonStates.end(); ++it) {
         const ButtonState &state = it.value();
         if (state.pageName == pageName && !state.entityId.isEmpty()) {
-            // Only subscribe to real HA entities (containing a dot like sensor.xxx, light.xxx)
-            // Skip page names and other non-entity data
             if (isValidHaEntity(state.entityId)) {
-                m_haClient->subscribeEntity(state.entityId);
-                
-                // Also request current state
-                m_haClient->requestState(state.entityId);
-            } else {
-                qDebug() << "[StateManager] Skipping non-HA entity:" << state.entityId;
+                if (m_haClient->subscribeEntity(state.entityId)) {
+                    m_haClient->requestState(state.entityId);
+                    subscribedCount++;
+                }
             }
         }
     }
@@ -295,7 +305,7 @@ void StateManager::onHaEntityStateChanged(const QString &entityId, const QString
 {
     auto it = m_entityToButtonKey.find(entityId);
     if (it == m_entityToButtonKey.end()) {
-        return; // Not tracking this entity
+        return;
     }
     
     QString key = it.value();
@@ -315,19 +325,15 @@ void StateManager::onHaEntityStateChanged(const QString &entityId, const QString
     }
     btnState.currentText = displayText;
     
-    qDebug() << "[StateManager] Button" << btnState.buttonIndex << "state changed:" 
-             << oldState << "->" << state;
-    
-    // Check if state-based icon should change
-    if (btnState.hasStateConfig && btnState.stateConfigs.contains(state)) {
+    // Always refresh when state changes for HA entities (lights, sensors, etc.)
+    if (oldState != state) {
         emit buttonStateChanged(btnState.buttonIndex, btnState.pageName, state);
         emit buttonNeedsRefresh(btnState.buttonIndex, btnState.pageName);
-    } else if (btnState.entityId.startsWith("sensor.")) {
-        // For sensors, text changed
+    }
+    
+    // For sensors, also emit text changed
+    if (btnState.entityId.startsWith("sensor.")) {
         emit buttonTextChanged(btnState.buttonIndex, btnState.pageName, displayText);
-    } else if (oldState != state) {
-        // State changed but no specific config - still refresh
-        emit buttonStateChanged(btnState.buttonIndex, btnState.pageName, state);
     }
 }
 

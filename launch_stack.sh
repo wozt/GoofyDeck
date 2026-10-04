@@ -10,6 +10,7 @@ PAGING_SOCK="/tmp/goofydeck_paging.sock"
 HA_SOCK="/tmp/goofydeck_ha.sock"
 TMUX_BASE="goofydeck"
 TMUX_SESSION="${TMUX_BASE}"
+ENABLE_WEBGUI="false"
 
 PID_DIR_DEFAULT="/dev/shm/goofydeck/pids"
 PID_DIR="${PID_DIR:-${PID_DIR_DEFAULT}}"
@@ -63,6 +64,7 @@ kill_all() {
     while IFS= read -r p; do extra_pids+=("$p"); done < <(pgrep -f "${ROOT}/ulanzi_d200_daemon" 2>/dev/null || true)
     while IFS= read -r p; do extra_pids+=("$p"); done < <(pgrep -f "${ROOT}/bin/paging_daemon" 2>/dev/null || true)
     while IFS= read -r p; do extra_pids+=("$p"); done < <(pgrep -f "${ROOT}/bin/ha_daemon" 2>/dev/null || true)
+    while IFS= read -r p; do extra_pids+=("$p"); done < <(pgrep -f "${ROOT}/webgui/server.py" 2>/dev/null || true)
 
     # De-dup + exclude ourselves
     uniq_pids=()
@@ -112,6 +114,19 @@ start_background() {
   ("${ROOT}/bin/paging_daemon") &
   echo $! >"${PID_DIR}/paging_daemon.pid"
 
+  # Start web-gui if enabled
+  if [ "${ENABLE_WEBGUI}" = "true" ]; then
+    echo "[launch] Starting web-gui..."
+    sleep 2
+    if command -v python3 >/dev/null 2>&1; then
+      ("${ROOT}/webgui/server.py" --host 0.0.0.0 --port 8765) &
+      echo $! >"${PID_DIR}/webgui.pid"
+      echo "[launch] Web GUI available at http://0.0.0.0:8765"
+    else
+      echo "[launch] WARNING: python3 not found, skipping web-gui"
+    fi
+  fi
+
   echo "[launch] Running."
   echo "[launch] PIDs:"
   ls -la "${PID_DIR}"
@@ -148,7 +163,16 @@ start_byobu() {
   "${mux_bin}" split-window -t "${TMUX_SESSION}:stack.1" -h
   "${mux_bin}" send-keys -t "${TMUX_SESSION}:stack.2" "cd \"${ROOT}\"; echo \\$\\$ >\"${PID_DIR}/ha_daemon.pid\"; exec ./bin/ha_daemon" C-m
 
-  "${mux_bin}" select-layout -t "${TMUX_SESSION}:stack" even-horizontal
+  # Pane 3: web-gui (if enabled)
+  if [ "${ENABLE_WEBGUI}" = "true" ]; then
+    echo "[launch] Adding web-gui pane..."
+    "${mux_bin}" split-window -t "${TMUX_SESSION}:stack.2" -h
+    "${mux_bin}" send-keys -t "${TMUX_SESSION}:stack.3" "cd \"${ROOT}\"; echo \\$\\$ >\"${PID_DIR}/webgui.pid\"; echo '[launch] sleep 7s before web-gui...' >&2; sleep 7; exec python3 webgui/server.py --host 0.0.0.0 --port 8765" C-m
+    "${mux_bin}" select-layout -t "${TMUX_SESSION}:stack" tiled
+  else
+    "${mux_bin}" select-layout -t "${TMUX_SESSION}:stack" even-horizontal
+  fi
+
   "${mux_bin}" select-pane -t "${TMUX_SESSION}:stack.0"
   echo "[launch] Attaching..."
   exec byobu-tmux attach -t "${TMUX_SESSION}"
@@ -162,6 +186,7 @@ Options:
   --kill               Stop all daemons started by launch_stack.sh (also kills byobu sessions ${TMUX_BASE} and ${TMUX_BASE}-*)
   --byobu              Run daemons inside byobu-tmux (session: ${TMUX_SESSION})
   --tmux               Alias for --byobu
+  --web-gui            Also start the web GUI (available at http://0.0.0.0:8765)
   --config <path>       (default: ${CONFIG_PATH})
   --ulanzi-sock <path>  (default: ${ULANZI_SOCK})
   --paging-sock <path>  (default: ${PAGING_SOCK})
@@ -170,6 +195,7 @@ Starts:
   1) ./ulanzi_d200_daemon
   2) ./bin/ha_daemon
   3) ./bin/paging_daemon
+  4) ./webgui/server.py (if --web-gui is specified)
 
 Stop:
   ./launch_stack.sh --kill
@@ -182,6 +208,7 @@ while [ "$#" -gt 0 ]; do
     --kill) MODE="kill"; shift ;;
     --byobu) MODE="byobu"; shift ;;
     --tmux) MODE="byobu"; shift ;;
+    --web-gui) ENABLE_WEBGUI="true"; shift ;;
     --config) CONFIG_PATH="${2:-}"; shift 2 ;;
     --ulanzi-sock) ULANZI_SOCK="${2:-}"; shift 2 ;;
     --paging-sock) PAGING_SOCK="${2:-}"; shift 2 ;;

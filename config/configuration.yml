@@ -490,7 +490,6 @@ pages:
         tap_action:
           action: $page.go_to
           data: games
-
   games:
     buttons:
       - name: "TicTacToe"

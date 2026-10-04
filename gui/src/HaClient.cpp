@@ -1,4 +1,5 @@
 #include "HaClient.h"
+#include "Config.h"
 #include <QLocalSocket>
 #include <QTimer>
 #include <QFile>
@@ -10,7 +11,7 @@
 
 HaClient::HaClient(QObject *parent)
     : QObject(parent)
-    , m_socketPath("/tmp/goofydeck_ha.sock")
+    , m_socketPath(Config::instance().haSocketPath())
 {
     m_reconnectTimer = new QTimer(this);
     m_reconnectTimer->setInterval(5000);
@@ -27,13 +28,17 @@ bool HaClient::loadConfig(const QString &envPath)
 {
     QString path = envPath;
     if (path.isEmpty()) {
-        // Try to find .env in parent directories
-        QStringList possiblePaths;
-        possiblePaths << "../.env" << "../../.env" << ".env";
-        for (const QString &p : possiblePaths) {
-            if (QFile::exists(p)) {
-                path = p;
-                break;
+        // Use Config to find .env file
+        path = Config::instance().envFilePath();
+        if (path.isEmpty()) {
+            // Fallback to relative paths
+            QStringList possiblePaths;
+            possiblePaths << "../.env" << "../../.env" << ".env";
+            for (const QString &p : possiblePaths) {
+                if (QFile::exists(p)) {
+                    path = p;
+                    break;
+                }
             }
         }
     }
@@ -116,7 +121,8 @@ bool HaClient::connectToDaemon()
     connect(m_socket, &QLocalSocket::disconnected, this, &HaClient::onSocketDisconnected);
     
     m_socket->connectToServer(m_socketPath);
-    if (!m_socket->waitForConnected(1000)) {
+    int timeoutMs = Config::instance().socketTimeoutMs();
+    if (!m_socket->waitForConnected(timeoutMs)) {
         qDebug() << "[HaClient] Failed to connect to ha_daemon:" << m_socket->errorString();
         delete m_socket;
         m_socket = nullptr;
@@ -308,6 +314,7 @@ void HaClient::parseLine(const QByteArray &line)
     }
     
     if (msg.startsWith("ok ")) {
+        qDebug() << "[HaClient] Received ok response:" << msg.left(100);
         // Response to get command: "ok {<state_json>}"
         QString jsonStr = msg.mid(3);
         QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
@@ -325,6 +332,7 @@ void HaClient::parseLine(const QByteArray &line)
                 haState.unit = unit;
                 m_cachedStates[entityId] = haState;
                 
+                qDebug() << "[HaClient] GET response for" << entityId << "state:" << state << "unit:" << unit;
                 emit entityStateReceived(entityId, jsonStr);
             }
         }
@@ -355,7 +363,8 @@ void HaClient::onSocketDisconnected()
     qDebug() << "[HaClient] Socket disconnected";
     m_connected = false;
     emit disconnected();
-    m_reconnectTimer->start();
+    // Attempt to reconnect after 5 seconds
+    m_reconnectTimer->start(5000);
 }
 
 void HaClient::reconnect()

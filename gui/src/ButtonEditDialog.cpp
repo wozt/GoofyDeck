@@ -92,7 +92,7 @@ void ButtonEditDialog::setupUI()
     // Buttons
     QDialogButtonBox *buttonBox = new QDialogButtonBox(
         QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-    connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &ButtonEditDialog::validateAndAccept);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
     mainLayout->addWidget(buttonBox);
 }
@@ -320,4 +320,77 @@ QPixmap ButtonEditDialog::generateStyledIcon(const QString &iconName, const QStr
     
     // Return empty pixmap
     return QPixmap();
+}
+
+void ButtonEditDialog::validateAndAccept()
+{
+    QString name = m_nameEdit->text().trimmed();
+    QString action = m_actionEdit->text().trimmed();
+    QString icon = m_iconEdit->text().trimmed();
+    
+    // Validate name (required)
+    if (name.isEmpty()) {
+        QMessageBox::warning(this, "Validation Error", "Button name is required.");
+        m_nameEdit->setFocus();
+        return;
+    }
+    
+    // Validate name length
+    if (name.length() > 20) {
+        QMessageBox::warning(this, "Validation Error", "Button name must be 20 characters or less.");
+        m_nameEdit->setFocus();
+        return;
+    }
+    
+    // Validate icon format if provided
+    if (!icon.isEmpty()) {
+        // Check for valid icon formats
+        bool validIcon = false;
+        if (icon.startsWith("mdi:")) {
+            validIcon = true;
+        } else if (icon.startsWith("url:")) {
+            validIcon = true;
+        } else if (icon.startsWith("local:")) {
+            validIcon = true;
+        } else if (icon.startsWith("/") || icon.startsWith("./")) {
+            validIcon = true;
+        }
+        
+        if (!validIcon) {
+            QMessageBox::warning(this, "Validation Error", 
+                "Invalid icon format. Use:\n"
+                "- mdi:icon_name\n"
+                "- url:https://...\n"
+                "- local:/path/to/icon\n"
+                "- /absolute/path/to/icon");
+            m_iconEdit->setFocus();
+            return;
+        }
+    }
+    
+    // Validate action format if provided
+    if (!action.isEmpty()) {
+        bool validAction = false;
+        if (action.startsWith("$page.")) {
+            validAction = true;
+        } else if (action.startsWith("$cmd.")) {
+            validAction = true;
+        } else if (action.contains(".")) {
+            // Assume it's a Home Assistant service (e.g., light.toggle)
+            validAction = true;
+        }
+        
+        if (!validAction) {
+            QMessageBox::warning(this, "Validation Error", 
+                "Invalid action format. Use:\n"
+                "- $page.go_to\n"
+                "- $cmd.exec\n"
+                "- light.toggle (Home Assistant service)");
+            m_actionEdit->setFocus();
+            return;
+        }
+    }
+    
+    // All validations passed
+    accept();
 }

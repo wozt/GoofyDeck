@@ -1,4 +1,5 @@
 #include "IconCache.h"
+#include "Config.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -23,12 +24,17 @@ static uint32_t fnv1a32(const QByteArray &data)
 
 IconCache::IconCache(QObject *parent)
     : QObject(parent)
-    , m_cacheRoot(".cache")
+    , m_cacheRoot(Config::instance().cacheRoot())
+    , m_projectRoot(Config::instance().assetsPath())
     , m_watcher(nullptr)
     , m_pollTimer(nullptr)
-    , m_currentDirWatcher(nullptr)
+    , m_currentDirWatcher(new QFileSystemWatcher(this))
     , m_lastOffset(0)
 {
+    connect(m_currentDirWatcher, &QFileSystemWatcher::directoryChanged,
+            this, &IconCache::onCurrentDirChanged);
+    connect(m_currentDirWatcher, &QFileSystemWatcher::fileChanged,
+            this, &IconCache::onCurrentDirChanged);
 }
 
 IconCache::~IconCache()
@@ -38,12 +44,28 @@ IconCache::~IconCache()
 
 bool IconCache::findSessionCache()
 {
+    // Use Config to get session directory
+    QString configSessionDir = Config::instance().sessionDir();
+    
     // Look for /dev/shm/goofydeck directory (new structure)
     // or /dev/shm/goofydeck_* directories (old structure)
     QDir shmDir("/dev/shm");
     if (!shmDir.exists()) {
         qDebug() << "/dev/shm not available";
         return false;
+    }
+    
+    // First try configured session directory
+    if (!configSessionDir.isEmpty() && QDir(configSessionDir).exists()) {
+        m_sessionDir = configSessionDir;
+        qDebug() << "Found session cache (from config):" << m_sessionDir;
+        
+        // Initialize last known page from file
+        m_lastPage = getCurrentPage();
+        m_lastOffset = getCurrentOffset();
+        qDebug() << "[IconCache] Initial page:" << m_lastPage << "offset:" << m_lastOffset;
+        
+        return true;
     }
     
     // First try /dev/shm/goofydeck/paging (new structure)
@@ -56,6 +78,13 @@ bool IconCache::findSessionCache()
         m_lastPage = getCurrentPage();
         m_lastOffset = getCurrentOffset();
         qDebug() << "[IconCache] Initial page:" << m_lastPage << "offset:" << m_lastOffset;
+        
+        // Start watching current/ directory for sensor updates
+        QString currentDir = m_sessionDir + "/current";
+        if (QDir(currentDir).exists()) {
+            m_currentDirWatcher->addPath(currentDir);
+            qDebug() << "[IconCache] Watching current/ directory:" << currentDir;
+        }
         
         return true;
     }
@@ -73,6 +102,13 @@ bool IconCache::findSessionCache()
             m_lastPage = getCurrentPage();
             m_lastOffset = getCurrentOffset();
             qDebug() << "[IconCache] Initial page:" << m_lastPage << "offset:" << m_lastOffset;
+            
+            // Start watching current/ directory for sensor updates
+            QString currentDir = m_sessionDir + "/current";
+            if (QDir(currentDir).exists()) {
+                m_currentDirWatcher->addPath(currentDir);
+                qDebug() << "[IconCache] Watching current/ directory:" << currentDir;
+            }
             
             return true;
         }
@@ -850,18 +886,46 @@ QPixmap IconCache::getComposedIconForState(int buttonIndex, const QString &iconN
     if (m_sessionDir.isEmpty()) return QPixmap();
     if (stateValue.isEmpty()) return QPixmap();
     
-    // First try to find a state-specific composed icon
+    qDebug() << "[IconCache] getComposedIconForState: button" << buttonIndex 
+             << "page" << pageName << "state" << stateValue << "icon" << iconName;
+    
+    // Try wp_comp directory first (composed icons with wallpaper)
     QString stateIconPath = findStateIconPath(buttonIndex, pageName, stateValue, iconName);
     if (!stateIconPath.isEmpty()) {
         QPixmap pix = loadFromPath(stateIconPath);
         if (!pix.isNull()) {
-            qDebug() << "[IconCache] LOADED state icon for button" << buttonIndex 
-                     << "state:" << stateValue << "from" << stateIconPath;
+            qDebug() << "[IconCache] LOADED state icon from wp_comp:" << stateIconPath;
             return pix;
         }
     }
     
-    // Fallback to regular composed icon
+    // Fallback: try .cache directory (where paging.c stores state icons)
+    QString cachePageDir = m_cacheRoot + "/" + pageName;
+    QDir cacheDir(cachePageDir);
+    
+    if (cacheDir.exists()) {
+        QStringList filters;
+        filters << QString("%1-*.png").arg(buttonIndex);
+        cacheDir.setNameFilters(filters);
+        QFileInfoList files = cacheDir.entryInfoList(QDir::Files);
+        
+        // Look for state-specific file
+        QString statePattern = "-" + stateValue + ".png";
+        for (const QFileInfo &fileInfo : files) {
+            QString fileName = fileInfo.fileName();
+            if (fileName.endsWith(statePattern, Qt::CaseInsensitive)) {
+                QString fullPath = fileInfo.absoluteFilePath();
+                QPixmap pix = loadFromPath(fullPath);
+                if (!pix.isNull()) {
+                    qDebug() << "[IconCache] LOADED state icon from .cache:" << fullPath;
+                    return pix;
+                }
+            }
+        }
+    }
+    
+    // Final fallback to regular composed icon
+    qDebug() << "[IconCache] Fallback to regular composed icon for button" << buttonIndex;
     return getComposedIcon(buttonIndex, iconName, pageName);
 }
 
@@ -1146,4 +1210,152 @@ bool IconCache::hasStateIcon(int buttonIndex, const QString &pageName, const QSt
     // Check if we can find a state-specific icon
     QString path = const_cast<IconCache*>(this)->findStateIconPath(buttonIndex, pageName, stateValue, QString());
     return !path.isEmpty() && QFile::exists(path);
+}
+
+QPixmap IconCache::regenerateSensorIcon(int buttonIndex, const QString &pageName, 
+                                         const QString &text, const QString &baseIcon)
+{
+    if (m_projectRoot.isEmpty()) {
+        qDebug() << "[IconCache] Project root not set, cannot regenerate sensor icon";
+        return QPixmap();
+    }
+    
+    qDebug() << "[IconCache] Regenerating sensor icon for button" << buttonIndex 
+             << "page" << pageName << "text" << text;
+    
+    // Find base icon
+    QString baseIconPath;
+    if (!baseIcon.isEmpty()) {
+        // Use provided base icon name - try to find it in assets
+        if (baseIcon.startsWith("mdi:")) {
+            // MDI icon - need to generate it first
+            baseIconPath = m_projectRoot + "/assets/pregen/blank.png";
+        } else if (baseIcon.startsWith("/")) {
+            // Absolute path
+            baseIconPath = baseIcon;
+        } else {
+            // Relative path
+            baseIconPath = m_projectRoot + "/" + baseIcon;
+        }
+    } else {
+        // Try to get base icon from cache
+        QPixmap basePixmap = getButtonIcon(buttonIndex, pageName);
+        if (basePixmap.isNull()) {
+            // Fallback to blank icon
+            baseIconPath = m_projectRoot + "/assets/pregen/blank.png";
+        } else {
+            // Save the pixmap to a temp file to use as base
+            QString tmpDir = m_sessionDir + "/tmp";
+            QDir tmp(tmpDir);
+            if (!tmp.exists()) {
+                tmp.mkpath(tmpDir);
+            }
+            baseIconPath = QString("%1/base_%2_%3.png").arg(tmpDir).arg(buttonIndex).arg(QDateTime::currentMSecsSinceEpoch());
+            basePixmap.save(baseIconPath);
+        }
+    }
+    
+    if (!QFile::exists(baseIconPath)) {
+        qDebug() << "[IconCache] Base icon not found:" << baseIconPath;
+        return QPixmap();
+    }
+    
+    // Create temp directory for output
+    QString tmpDir = m_sessionDir + "/tmp";
+    QDir tmp(tmpDir);
+    if (!tmp.exists()) {
+        tmp.mkpath(tmpDir);
+    }
+    
+    // Sanitize page name for filename
+    QString pageTag = pageName;
+    pageTag.replace(QRegularExpression("[^a-zA-Z0-9_]"), "_");
+    
+    // Generate unique output filename
+    qint64 timestamp = QDateTime::currentMSecsSinceEpoch();
+    QString outPath = QString("%1/sensor_%2_%3_%4.png").arg(tmpDir).arg(pageTag).arg(buttonIndex).arg(timestamp);
+    
+    // Copy base icon to output
+    if (!QFile::copy(baseIconPath, outPath)) {
+        qDebug() << "[IconCache] Failed to copy base icon to:" << outPath;
+        return QPixmap();
+    }
+    
+    // Call draw_text to add text overlay
+    QString drawTextBin = m_projectRoot + "/icons/draw_text";
+    if (!QFile::exists(drawTextBin)) {
+        qDebug() << "[IconCache] draw_text binary not found:" << drawTextBin;
+        QFile::remove(outPath);
+        return QPixmap();
+    }
+    
+    // Default text parameters (from cmd_button preset in config)
+    QString textColor = "00FF00";
+    QString textAlign = "center";
+    QString textFont = "dustismo_bold.ttf";
+    int textSize = 50;
+    int textOffsetX = 0;
+    int textOffsetY = 0;
+    
+    // Build command
+    QStringList args;
+    args << QString("--text=%1").arg(text);
+    args << QString("--text_color=%1").arg(textColor);
+    args << QString("--text_align=%1").arg(textAlign);
+    args << QString("--text_font=%1").arg(textFont);
+    args << QString("--text_size=%1").arg(textSize);
+    args << QString("--text_offset=%1,%2").arg(textOffsetX).arg(textOffsetY);
+    args << outPath;
+    
+    QProcess process;
+    process.start(drawTextBin, args);
+    if (!process.waitForFinished(5000)) {
+        qDebug() << "[IconCache] draw_text timed out";
+        QFile::remove(outPath);
+        return QPixmap();
+    }
+    
+    if (process.exitCode() != 0) {
+        qDebug() << "[IconCache] draw_text failed with exit code:" << process.exitCode();
+        qDebug() << "[IconCache] stderr:" << process.readAllStandardError();
+        QFile::remove(outPath);
+        return QPixmap();
+    }
+    
+    // Call draw_optimize to optimize the image
+    QString drawOptBin = m_projectRoot + "/icons/draw_optimize";
+    if (QFile::exists(drawOptBin)) {
+        QStringList optArgs;
+        optArgs << outPath;
+        QProcess optProcess;
+        optProcess.start(drawOptBin, optArgs);
+        if (optProcess.waitForFinished(5000)) {
+            qDebug() << "[IconCache] draw_optimize completed";
+        }
+    }
+    
+    // Save to current/ directory
+    QString currentDir = m_sessionDir + "/current";
+    QDir cdir(currentDir);
+    if (!cdir.exists()) {
+        cdir.mkpath(currentDir);
+    }
+    
+    QString currentPath = QString("%1/%2_%3.png").arg(currentDir).arg(pageTag).arg(buttonIndex, 2, 10, QChar('0'));
+    if (QFile::exists(currentPath)) {
+        QFile::remove(currentPath);
+    }
+    QFile::copy(outPath, currentPath);
+    
+    // Load and return the generated icon
+    QPixmap result = loadFromPath(currentPath);
+    
+    // Clean up temp file
+    QFile::remove(outPath);
+    
+    if (!result.isNull()) {
+        qDebug() << "[IconCache] Successfully regenerated sensor icon:" << currentPath;
+    }
+    
+    return result;
 }
